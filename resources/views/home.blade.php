@@ -1,0 +1,2104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ config('app.name') }} · Municipality of Aborlan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="preload" as="image" href="{{ $heroImageUrl }}" fetchpriority="high" />
+  <style>
+    :root {
+      --navy: #2a0a32;
+      --navy-soft: #701a75;
+      --teal: #c026d3;
+      --teal-hover: #a21caf;
+      --teal-muted: rgba(192, 38, 211, 0.14);
+      --gold: #ca8a04;
+      --gold-light: #ffea00;
+      --magenta-bright: #e879f9;
+      --text: #1a0a1f;
+      --text-muted: #6b4a6e;
+      --border: #f5d0f3;
+      --surface: #ffffff;
+      --bg: #fce7f3;
+      --bg-subtle: #fffbeb;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow-sm: 0 1px 2px rgba(88, 28, 135, 0.08);
+      --shadow: 0 4px 24px rgba(190, 24, 93, 0.1);
+      --shadow-lg: 0 20px 50px rgba(126, 34, 206, 0.14);
+      --font: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Anchor targets clear sticky top bar + header */
+    section[id],
+    .cta-wrap[id] {
+      scroll-margin-top: 7.5rem;
+    }
+
+    body {
+      font-family: var(--font);
+      color: var(--text);
+      background: linear-gradient(165deg, var(--bg-subtle) 0%, #fff4e6 35%, #fdf4ff 70%, #fef9c3 100%);
+      background-attachment: fixed;
+      line-height: 1.65;
+      font-size: 1.0625rem;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      width: min(92%, 1140px);
+      margin-inline: auto;
+    }
+
+    /* Top bar */
+    .top-bar {
+      background: linear-gradient(115deg, #4c0519 0%, #701a75 38%, #1e1b4b 100%);
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      box-shadow: inset 0 -2px 0 var(--gold-light);
+    }
+
+    .top-bar .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem 1.5rem;
+      padding: 0.45rem 0;
+      letter-spacing: 0.02em;
+    }
+
+    .top-bar-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem 1rem;
+      flex: 1;
+      min-width: min(100%, 28rem);
+    }
+
+    .top-bar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-shrink: 0;
+    }
+
+    .top-bar-actions .btn {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      padding: 0.38rem 0.85rem;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
+    }
+
+    .btn-top-signin {
+      background: rgba(232, 121, 249, 0.15);
+      color: #fff;
+      border: 1px solid var(--magenta-bright);
+      box-shadow: 0 0 20px rgba(232, 121, 249, 0.25);
+    }
+
+    .btn-top-signin:hover {
+      color: var(--navy);
+      border-color: var(--gold-light);
+      background: var(--gold-light);
+      box-shadow: 0 0 24px rgba(255, 234, 0, 0.45);
+    }
+
+    .btn-top-book {
+      background: var(--gold-light);
+      color: var(--navy);
+      border: none;
+      box-shadow: 0 1px 8px rgba(255, 234, 0, 0.5), 0 0 0 1px rgba(192, 38, 211, 0.45);
+    }
+
+    .btn-top-book:hover {
+      background: #fff48f;
+      color: var(--navy);
+      box-shadow: 0 2px 14px rgba(255, 234, 0, 0.55), 0 0 0 2px var(--teal);
+    }
+
+    .btn-top-signin:active {
+      transform: scale(0.97);
+    }
+
+    .btn-top-book:active {
+      transform: scale(0.97);
+      filter: brightness(0.95);
+    }
+
+    .top-bar-actions .btn:focus-visible {
+      outline: 2px solid var(--gold-light);
+      outline-offset: 2px;
+    }
+
+    .top-bar span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .top-bar strong {
+      color: var(--gold-light);
+      font-weight: 700;
+      text-shadow: 0 0 20px rgba(255, 234, 0, 0.35);
+    }
+
+    /* Header — editorial strip */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: #fff;
+      border-bottom: none;
+      box-shadow: 0 4px 20px rgba(88, 28, 135, 0.06);
+    }
+
+    header::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gold-light) 0%, var(--teal) 35%, var(--magenta-bright) 65%, var(--gold-light) 100%);
+      pointer-events: none;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem 1.25rem;
+      padding: 0.75rem 0;
+    }
+
+    .nav-cluster {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex: 1;
+      justify-content: flex-end;
+      min-width: 0;
+    }
+
+    .nav-toggle {
+      display: none;
+      margin-left: auto;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: var(--navy);
+      color: #fff;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s var(--ease), transform 0.15s var(--ease);
+    }
+
+    .nav-toggle:hover {
+      background: var(--navy-soft);
+    }
+
+    .nav-toggle:focus-visible {
+      outline: 2px solid var(--teal);
+      outline-offset: 2px;
+    }
+
+    .nav-toggle[aria-expanded="true"] {
+      background: var(--teal);
+    }
+
+    .nav-toggle-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 20px;
+      pointer-events: none;
+    }
+
+    .nav-toggle-bars span {
+      display: block;
+      height: 2px;
+      background: #fff;
+      border-radius: 1px;
+      transition: transform 0.25s var(--ease), opacity 0.2s var(--ease);
+    }
+
+    .nav-toggle[aria-expanded="true"] .nav-toggle-bars span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    .nav-toggle[aria-expanded="true"] .nav-toggle-bars span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .nav-toggle[aria-expanded="true"] .nav-toggle-bars span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-logo {
+      height: 96px;
+      width: auto;
+      max-width: min(340px, 58vw);
+      object-fit: contain;
+      object-position: left center;
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      line-height: 1.2;
+    }
+
+    .brand-text .name {
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+    }
+
+    .brand-text .tag {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .nav-links-wrap {
+      padding: 0;
+    }
+
+    @media (min-width: 901px) {
+      .nav-links-wrap {
+        padding: 0.22rem 0.32rem;
+        overflow: visible;
+        background: linear-gradient(
+          155deg,
+          rgba(255, 234, 0, 0.28) 0%,
+          rgba(255, 255, 255, 0.97) 42%,
+          rgba(232, 121, 249, 0.16) 100%
+        );
+        border: 1px solid rgba(192, 38, 211, 0.2);
+        border-radius: 999px;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.9),
+          0 2px 16px rgba(42, 10, 50, 0.06);
+      }
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.12rem;
+      list-style: none;
+      justify-content: flex-end;
+    }
+
+    .nav-links li {
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-links li.nav-link-accent {
+      flex-shrink: 0;
+    }
+
+    .nav-links li + li::before {
+      display: none;
+    }
+
+    .nav-links a {
+      display: inline-block;
+      text-decoration: none;
+      color: var(--navy);
+      font-weight: 600;
+      font-size: 0.8125rem;
+      letter-spacing: 0.02em;
+      padding: 0.48rem 0.95rem;
+      border-radius: 999px;
+      border-bottom: none;
+      transition:
+        background 0.2s var(--ease),
+        color 0.2s var(--ease),
+        box-shadow 0.2s var(--ease),
+        transform 0.15s var(--ease),
+        filter 0.12s var(--ease);
+    }
+
+    .nav-links li:not(.nav-link-accent) a:hover {
+      color: var(--navy);
+      background: rgba(255, 234, 0, 0.45);
+      box-shadow: 0 0 0 1px rgba(192, 38, 211, 0.18);
+    }
+
+    .nav-links a:focus-visible {
+      outline: 2px solid var(--teal);
+      outline-offset: 2px;
+    }
+
+    .nav-links li.nav-link-accent a {
+      color: #fff;
+      font-weight: 700;
+      white-space: nowrap;
+      padding-inline: 1.05rem;
+      background: linear-gradient(135deg, var(--teal) 0%, #a855f7 100%);
+      box-shadow: 0 2px 14px rgba(192, 38, 211, 0.35);
+    }
+
+    .nav-links li.nav-link-accent a:hover {
+      color: #fff;
+      background: linear-gradient(135deg, var(--teal-hover) 0%, #9333ea 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 18px rgba(192, 38, 211, 0.42);
+    }
+
+    .nav-links li.nav-link-accent a:focus-visible {
+      outline: 2px solid var(--gold-light);
+      outline-offset: 3px;
+    }
+
+    .nav-links li:not(.nav-link-accent) a:active {
+      transform: scale(0.97);
+    }
+
+    .nav-links li.nav-link-accent a:active {
+      transform: translateY(0) scale(0.98);
+      filter: brightness(0.92);
+    }
+
+    .nav-links a[aria-current="page"] {
+      background: rgba(192, 38, 211, 0.18);
+      color: var(--navy);
+      box-shadow: inset 0 0 0 2px var(--teal);
+    }
+
+    .nav-links a[aria-current="page"]:hover {
+      background: rgba(255, 234, 0, 0.45);
+      color: var(--navy);
+      box-shadow: inset 0 0 0 2px var(--teal), 0 0 0 1px rgba(192, 38, 211, 0.18);
+    }
+
+    .nav-links li:not(.nav-link-accent) a.is-active {
+      background: rgba(192, 38, 211, 0.22);
+      color: var(--navy);
+      box-shadow: inset 0 0 0 2px var(--teal);
+    }
+
+    .nav-links li:not(.nav-link-accent) a.is-active:hover {
+      background: rgba(255, 234, 0, 0.5);
+      box-shadow: inset 0 0 0 2px var(--teal), 0 0 0 1px rgba(192, 38, 211, 0.2);
+    }
+
+    .nav-links li.nav-link-accent a.is-active {
+      color: #fff;
+      background: linear-gradient(135deg, var(--teal) 0%, #a855f7 100%);
+      box-shadow:
+        0 0 0 3px var(--gold-light),
+        0 4px 20px rgba(192, 38, 211, 0.45);
+      filter: none;
+    }
+
+    .nav-links li.nav-link-accent a.is-active:hover {
+      color: #fff;
+      background: linear-gradient(135deg, var(--teal-hover) 0%, #9333ea 100%);
+      transform: translateY(-1px);
+    }
+
+    .nav-links li.nav-link-accent a.is-active:active {
+      transform: translateY(0) scale(0.98);
+      filter: brightness(0.94);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      border-radius: var(--radius-sm);
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 0.9375rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s var(--ease), color 0.2s var(--ease), box-shadow 0.2s var(--ease), transform 0.15s var(--ease);
+      border: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--teal);
+      color: #fff;
+      padding: 0.65rem 1.25rem;
+      box-shadow: 0 2px 8px rgba(192, 38, 211, 0.25);
+    }
+
+    .btn-primary:hover {
+      background: var(--teal-hover);
+      box-shadow: 0 4px 14px rgba(192, 38, 211, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--navy);
+      padding: 0.65rem 1.1rem;
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--teal);
+      color: var(--teal);
+      background: var(--teal-muted);
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      padding: 0.65rem 1.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-light {
+      background: #fff;
+      color: var(--navy);
+      padding: 0.65rem 1.35rem;
+      box-shadow: var(--shadow);
+    }
+
+    .btn-light:hover {
+      background: var(--bg-subtle);
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--teal);
+      outline-offset: 3px;
+    }
+
+    .btn-primary:active {
+      transform: translateY(0) scale(0.98);
+      filter: brightness(0.92);
+    }
+
+    .btn-secondary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-ghost:active {
+      transform: scale(0.98);
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .btn-light:active {
+      transform: scale(0.98);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Hero — original navy/teal overlay & glass card (hero only; page theme unchanged below) */
+    .hero {
+      position: relative;
+      color: #fff;
+      padding: clamp(4rem, 10vw, 6.5rem) 0 clamp(4.5rem, 12vw, 7rem);
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(105deg, rgba(12, 25, 41, 0.9) 0%, rgba(15, 92, 85, 0.72) 48%, rgba(12, 25, 41, 0.88) 100%),
+        var(--hero-image) center 22% / cover no-repeat;
+      z-index: 0;
+    }
+
+    .hero-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 70% 20%, rgba(201, 162, 39, 0.12), transparent 55%);
+      pointer-events: none;
+    }
+
+    .hero .container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-grid {
+      display: grid;
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    @media (min-width: 900px) {
+      .hero-grid {
+        grid-template-columns: 1fr minmax(280px, 360px);
+        gap: 3rem;
+        align-items: center;
+      }
+    }
+
+    .hero .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 1.25rem;
+    }
+
+    .hero .eyebrow::before {
+      content: "";
+      width: 28px;
+      height: 2px;
+      background: #c9a227;
+      border-radius: 1px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.15rem, 4.5vw, 3.35rem);
+      font-weight: 700;
+      line-height: 1.12;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+      max-width: 18ch;
+    }
+
+    .hero-lead {
+      font-size: 1.125rem;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.88);
+      max-width: 52ch;
+      margin-bottom: 1.75rem;
+      font-weight: 400;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.875rem;
+      margin-bottom: 2.25rem;
+    }
+
+    /* Original hero CTAs: solid white primary, ghost secondary */
+    .hero-actions .btn-light {
+      background: #fff;
+      color: #0c1929;
+      padding: 0.65rem 1.35rem;
+      box-shadow: 0 4px 24px rgba(12, 25, 41, 0.08);
+    }
+
+    .hero-actions .btn-light:hover {
+      background: #f8fafc;
+      color: #0c1929;
+    }
+
+    .hero-actions .btn-ghost {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      padding: 0.65rem 1.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    .hero-actions .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: #fff;
+    }
+
+    .hero-actions .btn-light:focus-visible {
+      outline: 2px solid var(--gold-light);
+      outline-offset: 3px;
+    }
+
+    .hero-actions .btn-ghost:focus-visible {
+      outline: 2px solid var(--gold-light);
+      outline-offset: 3px;
+    }
+
+    .hero-actions .btn-light:active {
+      transform: scale(0.98);
+      background: #f1f5f9;
+    }
+
+    .hero-actions .btn-ghost:active {
+      transform: scale(0.98);
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .hero-meta dt {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255, 255, 255, 0.55);
+      margin-bottom: 0.25rem;
+    }
+
+    .hero-meta dd {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .hero-card {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.5rem 1.35rem;
+      backdrop-filter: blur(16px);
+    }
+
+    .hero-card h2 {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.75);
+      margin-bottom: 1rem;
+    }
+
+    .hero-card ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.875rem;
+    }
+
+    .hero-card li {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      font-size: 0.9375rem;
+      color: rgba(255, 255, 255, 0.92);
+      line-height: 1.45;
+    }
+
+    .hero-card svg {
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+      opacity: 0.9;
+    }
+
+    /* Sections */
+    .section {
+      padding: clamp(4rem, 8vw, 5.5rem) 0;
+    }
+
+    .section.alt {
+      background: var(--bg);
+    }
+
+    .section-head {
+      max-width: 640px;
+      margin-bottom: 2.75rem;
+    }
+
+    .section-head.center {
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+
+    .section-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--teal);
+      margin-bottom: 0.65rem;
+    }
+
+    .section-head h2 {
+      font-size: clamp(1.65rem, 3vw, 2.125rem);
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-head p {
+      color: var(--text-muted);
+      font-size: 1.0625rem;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0;
+      overflow: hidden;
+      transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    }
+
+    .card:hover {
+      border-color: rgba(255, 234, 0, 0.75);
+      box-shadow: 0 0 0 1px rgba(192, 38, 211, 0.22), var(--shadow);
+    }
+
+    .card-visual {
+      position: relative;
+      aspect-ratio: 16 / 10;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .card-visual img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      transition: transform 0.45s var(--ease);
+    }
+
+    .card:hover .card-visual img {
+      transform: scale(1.04);
+    }
+
+    .card-body {
+      padding: 1.5rem 1.75rem 1.75rem;
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      background: var(--teal-muted);
+      color: var(--teal);
+      display: grid;
+      place-items: center;
+      margin-bottom: 1.1rem;
+    }
+
+    .card-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .card h3 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .card p {
+      color: var(--text-muted);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--teal);
+      text-decoration: none;
+    }
+
+    .card-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Steps */
+    .steps {
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    @media (min-width: 768px) {
+      .steps {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+      }
+    }
+
+    .step {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem 1.5rem;
+    }
+
+    .step-num {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 50%;
+      background: var(--navy);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.875rem;
+      display: grid;
+      place-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .step h3 {
+      font-size: 1.0625rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 0.45rem;
+    }
+
+    .step p {
+      font-size: 0.9375rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* CTA */
+    .cta-wrap {
+      padding: 0 0 clamp(4rem, 8vw, 5.5rem);
+    }
+
+    .cta {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      color: #fff;
+      border-radius: var(--radius);
+      padding: clamp(2.5rem, 5vw, 3.5rem);
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .cta::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background:
+        linear-gradient(
+          135deg,
+          rgba(42, 10, 50, 0.94) 0%,
+          rgba(112, 26, 117, 0.82) 40%,
+          rgba(255, 234, 0, 0.2) 62%,
+          rgba(42, 10, 50, 0.95) 100%
+        ),
+        var(--cta-image) center 40% / cover no-repeat;
+    }
+
+    .cta > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta h2 {
+      font-size: clamp(1.5rem, 2.8vw, 2rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+      line-height: 1.25;
+    }
+
+    .cta p {
+      max-width: 560px;
+      margin: 0 auto 1.5rem;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 1.0625rem;
+    }
+
+    .cta-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    /* Footer */
+    footer {
+      position: relative;
+      background: linear-gradient(180deg, #3b0764 0%, var(--navy) 28%, #1a0520 100%);
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 0.9375rem;
+      padding: 3rem 0 2rem;
+      border-top: none;
+    }
+
+    footer::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gold-light), var(--teal), var(--magenta-bright), var(--gold-light));
+    }
+
+    .footer-grid {
+      display: grid;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .footer-grid {
+        grid-template-columns: 1.4fr 1fr 1fr;
+        gap: 2.5rem;
+      }
+    }
+
+    .footer-brand-lockup {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .footer-logo {
+      height: 88px;
+      width: auto;
+      max-width: 130px;
+      object-fit: contain;
+      object-position: left top;
+      flex-shrink: 0;
+    }
+
+    .footer-brand .name {
+      font-weight: 700;
+      color: #fff;
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-brand p {
+      line-height: 1.6;
+      max-width: 320px;
+    }
+
+    .footer-col h3 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 1rem;
+    }
+
+    .footer-col ul {
+      list-style: none;
+    }
+
+    .footer-col a {
+      color: rgba(255, 255, 255, 0.88);
+      text-decoration: none;
+      display: block;
+      padding: 0.4rem 0.5rem;
+      margin-left: -0.5rem;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: color 0.2s var(--ease), background 0.2s var(--ease);
+    }
+
+    .footer-col a:hover {
+      color: var(--navy);
+      background: var(--gold-light);
+      box-shadow: 0 0 0 1px var(--magenta-bright);
+    }
+
+    .footer-bottom {
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      font-size: 0.8125rem;
+      color: rgba(255, 255, 255, 0.55);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* Image gallery / carousel */
+    .carousel-section {
+      background: linear-gradient(160deg, #4a044e 0%, var(--navy) 45%, #312e81 100%);
+      color: #fff;
+      padding: clamp(3rem, 6vw, 4.25rem) 0;
+      box-shadow: inset 0 1px 0 rgba(255, 234, 0, 0.2);
+    }
+
+    .carousel-shell {
+      max-width: 1000px;
+      margin-inline: auto;
+    }
+
+    .carousel {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .carousel-viewport {
+      overflow: hidden;
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform 0.55s var(--ease);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .carousel-track {
+        transition: none;
+      }
+    }
+
+    .carousel-slide {
+      flex: 0 0 100%;
+      position: relative;
+      margin: 0;
+    }
+
+    .carousel-slide img {
+      width: 100%;
+      height: min(52vh, 540px);
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    .carousel-caption {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 1.25rem 1.5rem;
+      background: linear-gradient(transparent, rgba(42, 10, 50, 0.88));
+      font-size: 0.9375rem;
+      font-weight: 500;
+      line-height: 1.45;
+    }
+
+    .carousel-nav {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: none;
+      padding: 0 0.5rem;
+    }
+
+    .carousel-btn {
+      pointer-events: auto;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(42, 10, 50, 0.45);
+      color: #fff;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: background 0.2s var(--ease), transform 0.15s var(--ease);
+      backdrop-filter: blur(8px);
+    }
+
+    .carousel-btn:hover {
+      background: rgba(192, 38, 211, 0.75);
+      transform: scale(1.05);
+    }
+
+    .carousel-btn:active {
+      transform: scale(0.95);
+      background: rgba(192, 38, 211, 0.9);
+    }
+
+    .carousel-btn:focus-visible {
+      outline: 2px solid var(--gold-light);
+      outline-offset: 2px;
+    }
+
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .carousel-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: none;
+      padding: 0;
+      background: rgba(255, 255, 255, 0.35);
+      cursor: pointer;
+      transition: background 0.2s var(--ease), transform 0.15s var(--ease);
+    }
+
+    .carousel-dot[aria-selected="true"] {
+      background: var(--gold-light);
+      transform: scale(1.15);
+      box-shadow: 0 0 0 2px rgba(192, 38, 211, 0.55);
+    }
+
+    .carousel-dot:active {
+      transform: scale(0.9);
+    }
+
+    .carousel-dot[aria-selected="true"]:active {
+      transform: scale(1.05);
+    }
+
+    .carousel-dot:focus-visible {
+      outline: 2px solid var(--gold-light);
+      outline-offset: 2px;
+    }
+
+    .carousel-live {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    /* Visitor guide (Nag Atup / docs workflow) */
+    .guide-list {
+      list-style: none;
+      max-width: 720px;
+      margin-inline: auto;
+      counter-reset: guide;
+    }
+
+    .guide-item {
+      position: relative;
+      padding-left: 3.25rem;
+      padding-bottom: 1.75rem;
+      border-left: 2px solid rgba(192, 38, 211, 0.35);
+      margin-left: 1rem;
+    }
+
+    .guide-item:last-child {
+      border-left-color: transparent;
+      padding-bottom: 0;
+    }
+
+    .guide-item::before {
+      counter-increment: guide;
+      content: counter(guide);
+      position: absolute;
+      left: -1rem;
+      transform: translateX(-50%);
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: var(--teal);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.875rem;
+      display: grid;
+      place-items: center;
+      top: 0;
+      box-shadow: 0 2px 8px rgba(192, 38, 211, 0.3);
+    }
+
+    .guide-item h3 {
+      font-size: 1.0625rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 0.4rem;
+    }
+
+    .guide-item p {
+      color: var(--text-muted);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    .guide-item .guide-doc {
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--teal);
+    }
+
+    .guide-item .guide-doc a {
+      color: var(--teal-hover);
+      text-decoration: underline;
+    }
+
+    .guide-item .guide-doc a:hover {
+      color: var(--navy);
+    }
+
+    .guide-note {
+      max-width: 640px;
+      margin: 2rem auto 0;
+      padding: 1rem 1.25rem;
+      background: linear-gradient(135deg, rgba(255, 234, 0, 0.18), var(--teal-muted));
+      border: 1px solid rgba(192, 38, 211, 0.22);
+      border-left: 4px solid var(--gold-light);
+      border-radius: var(--radius-sm);
+      font-size: 0.9375rem;
+      color: var(--text);
+    }
+
+    /* Download / forms grid */
+    .doc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .doc-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.5rem 1.35rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    }
+
+    .doc-card:hover {
+      border-color: rgba(255, 234, 0, 0.85);
+      box-shadow: 0 0 0 1px rgba(192, 38, 211, 0.2), var(--shadow);
+    }
+
+    .doc-card .doc-step {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--teal);
+    }
+
+    .doc-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.25;
+    }
+
+    .doc-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      flex-grow: 1;
+    }
+
+    .btn-doc {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      margin-top: 0.35rem;
+      padding: 0.55rem 1rem;
+      border-radius: var(--radius-sm);
+      background: var(--navy);
+      color: #fff;
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-decoration: none;
+      transition: background 0.2s var(--ease), transform 0.12s var(--ease), filter 0.12s var(--ease);
+    }
+
+    .btn-doc:hover {
+      background: var(--navy-soft);
+    }
+
+    .btn-doc:active {
+      transform: scale(0.98);
+      filter: brightness(0.95);
+    }
+
+    .btn-doc:focus-visible {
+      outline: 2px solid var(--teal);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 1100px) {
+      .nav-links a {
+        font-size: 0.75rem;
+        padding: 0.42rem 0.72rem;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .nav-toggle {
+        display: inline-flex;
+      }
+
+      .nav-cluster {
+        display: none;
+        order: 3;
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        padding: 1rem 0 0.35rem;
+        margin-top: 0.35rem;
+        border-top: 1px solid rgba(192, 38, 211, 0.15);
+        flex: none;
+        justify-content: flex-start;
+      }
+
+      .nav-cluster.is-open {
+        display: flex;
+      }
+
+      .nav-links-wrap {
+        width: 100%;
+        padding: 0;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .nav-links {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.45rem;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        overflow: visible;
+      }
+
+      .nav-links li {
+        display: block;
+        border-bottom: none;
+      }
+
+      .nav-links li + li::before {
+        display: none;
+      }
+
+      .nav-links a {
+        text-align: left;
+        padding: 0.9rem 1.15rem;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        border-radius: var(--radius);
+        color: var(--navy);
+        background: #fff;
+        border: 1px solid var(--border);
+        box-shadow: 0 2px 10px rgba(42, 10, 50, 0.05);
+      }
+
+      .nav-links li:not(.nav-link-accent) a:hover {
+        background: linear-gradient(100deg, rgba(255, 234, 0, 0.28), #fff 55%);
+        border-color: rgba(192, 38, 211, 0.35);
+        color: var(--navy);
+        transform: none;
+        box-shadow: 0 2px 14px rgba(192, 38, 211, 0.12);
+      }
+
+      .nav-links li.nav-link-accent a {
+        background: linear-gradient(135deg, var(--teal) 0%, #a855f7 100%);
+        color: #fff;
+        border: none;
+        box-shadow: 0 3px 16px rgba(192, 38, 211, 0.35);
+        white-space: nowrap;
+      }
+
+      .nav-links li.nav-link-accent a:hover {
+        color: #fff;
+        background: linear-gradient(135deg, var(--teal-hover) 0%, #9333ea 100%);
+        border: none;
+      }
+
+      .nav-links li.nav-link-accent a:focus-visible {
+        outline: 2px solid var(--gold-light);
+        outline-offset: 3px;
+      }
+
+      .nav-links li:not(.nav-link-accent) a:active {
+        transform: scale(0.99);
+      }
+
+      .nav-links li.nav-link-accent a:active {
+        transform: scale(0.98);
+        filter: brightness(0.94);
+      }
+
+      .nav-links a[aria-current="page"] {
+        background: linear-gradient(100deg, rgba(255, 234, 0, 0.35), #fff 65%);
+        border-color: rgba(192, 38, 211, 0.45);
+        box-shadow: 0 0 0 2px var(--teal), 0 2px 12px rgba(192, 38, 211, 0.12);
+      }
+
+      .nav-links li:not(.nav-link-accent) a.is-active {
+        background: linear-gradient(100deg, rgba(255, 234, 0, 0.4), #fff 60%);
+        border-color: rgba(192, 38, 211, 0.5);
+        box-shadow: 0 0 0 2px var(--teal), 0 2px 12px rgba(192, 38, 211, 0.1);
+      }
+
+      .nav-links li:not(.nav-link-accent) a.is-active:hover {
+        border-color: rgba(192, 38, 211, 0.55);
+      }
+
+      .nav-links li.nav-link-accent a.is-active {
+        background: linear-gradient(135deg, var(--teal) 0%, #a855f7 100%);
+        color: #fff;
+        border: none;
+        box-shadow: 0 0 0 3px var(--gold-light), 0 4px 18px rgba(192, 38, 211, 0.4);
+      }
+
+      .nav-links li.nav-link-accent a.is-active:hover {
+        color: #fff;
+        background: linear-gradient(135deg, var(--teal-hover) 0%, #9333ea 100%);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .top-bar-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+
+      .top-bar-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+
+      .hero h1 {
+        max-width: none;
+      }
+
+      .hero-meta {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  @php
+    $officialDocs = [
+      [
+        'step' => 'Step 1',
+        'file' => 'NAG ATUP INFORMATION.pdf',
+        'title' => 'Nag Atup information',
+        'desc' => 'Read site rules, orientation, and LGU guidance before planning your visit.',
+      ],
+      [
+        'step' => 'Step 2',
+        'file' => 'HEALTH DECLARATION FORM.pdf',
+        'title' => 'Health declaration',
+        'desc' => 'Complete the health declaration as required for visitor entry and activity participation.',
+      ],
+      [
+        'step' => 'Step 3',
+        'file' => 'ACKNOWLEDGEMENT AND WAIVER OF RISK.pdf',
+        'title' => 'Acknowledgement & waiver of risk',
+        'desc' => 'Review and sign the acknowledgement and waiver where applicable to your activity.',
+      ],
+      [
+        'step' => 'Step 4',
+        'file' => 'NAG-ATUP Visitors Entry Permit.pdf',
+        'title' => 'Visitors entry permit',
+        'desc' => 'Apply for the official Nag-Atup visitors entry permit and follow verification steps at the municipal desk.',
+      ],
+    ];
+  @endphp
+  <div class="top-bar">
+    <div class="container">
+      <div class="top-bar-meta">
+        <span><strong>Official</strong> municipal e-service channel</span>
+        <span>Front desk: <strong>(XXX) XXX-XXXX</strong> · Mon–Fri, 8:00 AM – 5:00 PM</span>
+      </div>
+      <div class="top-bar-actions">
+        @auth
+          <a href="{{ auth()->user()->is_admin ? route('admin.dashboard') : route('bookings.index') }}" class="btn btn-top-signin">{{ auth()->user()->is_admin ? 'Admin dashboard' : 'My bookings' }}</a>
+          <form method="POST" action="{{ route('logout') }}" style="margin:0;">
+            @csrf
+            <button type="submit" class="btn btn-top-book" style="border:none; cursor:pointer;">Sign out</button>
+          </form>
+        @else
+          <a href="{{ route('login') }}" class="btn btn-top-signin">Sign in</a>
+          <a href="{{ route('atup.overview') }}" class="btn btn-top-book">Book Atup-atup hike</a>
+        @endauth
+      </div>
+    </div>
+  </div>
+
+  <header>
+    <div class="container nav">
+      <a class="brand" href="{{ url('/') }}">
+        <img
+          class="brand-logo"
+          src="{{ asset('images/Logo.png') }}"
+          alt="Seal of the Municipality of Aborlan"
+          width="347"
+          height="96"
+          decoding="async"
+        />
+        <span class="brand-text">
+          <span class="name">{{ config('app.name') }}</span>
+          <span class="tag">Municipality of Aborlan · Palawan</span>
+        </span>
+      </a>
+      <button
+        type="button"
+        class="nav-toggle"
+        id="nav-toggle"
+        aria-expanded="false"
+        aria-controls="nav-cluster"
+      >
+        <span class="nav-toggle-bars" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+        <span class="sr-only">Open menu</span>
+      </button>
+      <div class="nav-cluster" id="nav-cluster">
+        <nav class="nav-links-wrap" aria-label="Primary navigation">
+          <ul class="nav-links">
+            <li>
+              <a href="{{ url('/') }}" aria-current="page">Home</a>
+            </li>
+            <li><a href="{{ route('atup.overview') }}">Atup-atup Falls</a></li>
+            <li><a href="#gallery">Gallery</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#visitor-guide">Visitor guide</a></li>
+            <li><a href="#forms">Forms</a></li>
+            <li><a href="#how">How it works</a></li>
+            <li class="nav-link-accent"><a href="{{ route('atup.overview') }}">Book a hike</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div
+      class="hero-bg"
+      style="--hero-image: url('{{ $heroImageUrl }}');"
+      aria-hidden="true"
+    ></div>
+    <div class="container">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Public service</p>
+          <h1>Secure online booking for municipal services</h1>
+          <p class="hero-lead">
+            Schedule appointments, reserve public facilities, and access tourism-related services through a single,
+            privacy-conscious portal—aligned with streamlined delivery of local government services.
+          </p>
+          <div class="hero-actions">
+            <a href="{{ route('atup.overview') }}" class="btn btn-light">Book Atup-atup Falls hike</a>
+            <a href="#gallery" class="btn btn-ghost">View destination gallery</a>
+          </div>
+          <dl class="hero-meta">
+            <div>
+              <dt>Availability</dt>
+              <dd>Online requests · 24 hours</dd>
+            </div>
+            <div>
+              <dt>Processing</dt>
+              <dd>Confirmation during office hours</dd>
+            </div>
+            <div>
+              <dt>Data handling</dt>
+              <dd>Handled per municipal policy</dd>
+            </div>
+          </dl>
+        </div>
+        <aside class="hero-card" aria-labelledby="hero-aside-title">
+          <h2 id="hero-aside-title">At a glance</h2>
+          <ul>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <span>Centralized scheduling for frontline offices and bookable venues.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span>Designed with appropriate safeguards for resident and visitor information.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span>Clear steps from service selection to booking confirmation.</span>
+            </li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="carousel-section" id="gallery" aria-labelledby="gallery-title">
+    <div class="container">
+      <div class="section-head center" style="margin-bottom: 2rem;">
+        <p class="section-kicker" style="color: rgba(255,255,255,0.65);">Destination gallery</p>
+        <h2 id="gallery-title" style="color: #fff;">Aborlan &amp; Nag Atup in photographs</h2>
+        <p style="color: rgba(255,255,255,0.82);">A sample of local landscapes and visitor experiences. Official requirements for entry are listed in the visitor guide and downloadable forms below.</p>
+      </div>
+      <div class="carousel-shell">
+        <div class="carousel" data-carousel>
+          <div class="carousel-viewport">
+            <div class="carousel-track">
+              @foreach ($gallerySlides as $slide)
+                <figure class="carousel-slide" data-caption="{{ e($slide['caption']) }}">
+                  <img
+                    src="{{ $slide['url'] }}"
+                    alt="{{ $slide['caption'] }}"
+                    loading="{{ $loop->first ? 'eager' : 'lazy' }}"
+                    decoding="async"
+                    @if ($loop->first) fetchpriority="high" @endif
+                  />
+                  <figcaption class="carousel-caption">{{ $slide['caption'] }}</figcaption>
+                </figure>
+              @endforeach
+            </div>
+          </div>
+          <div class="carousel-nav" aria-hidden="false">
+            <button type="button" class="carousel-btn carousel-prev" aria-label="Previous slide">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button type="button" class="carousel-btn carousel-next" aria-label="Next slide">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+          <div class="carousel-dots" role="tablist" aria-label="Slide selection">
+            @foreach ($gallerySlides as $slide)
+              <button
+                type="button"
+                class="carousel-dot"
+                role="tab"
+                aria-selected="{{ $loop->first ? 'true' : 'false' }}"
+                aria-label="Show slide {{ $loop->iteration }}"
+              ></button>
+            @endforeach
+          </div>
+          <p class="carousel-live" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="services">
+    <div class="container">
+      <div class="section-head center">
+        <p class="section-kicker">Service catalogue</p>
+        <h2>Bookings we currently support</h2>
+        <p>Select a category to view availability and requirements. Additional services may be added as programs expand.</p>
+      </div>
+      <div class="cards">
+        <article class="card">
+          <div class="card-visual">
+            <img
+              src="{{ asset('images/IMG_20260319_095538_611.jpg') }}"
+              alt="Clear pool and small waterfall in lush forest near Aborlan"
+              width="640"
+              height="400"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="card-body">
+            <div class="card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <h3>Office appointments</h3>
+            <p>Plan visits to municipal offices for permits, certifications, and other frontline transactions.</p>
+            <a class="card-link" href="#">Check availability →</a>
+          </div>
+        </article>
+        <article class="card">
+          <div class="card-visual">
+            <img
+              src="{{ asset('images/IMG_20260319_110328_673.jpg') }}"
+              alt="Dramatic rock gorge and forest canopy in Palawan"
+              width="640"
+              height="400"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="card-body">
+            <div class="card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <h3>Facility reservations</h3>
+            <p>Request use of community halls, multi-purpose venues, and other municipally managed spaces.</p>
+            <a class="card-link" href="#">View facilities →</a>
+          </div>
+        </article>
+        <article class="card">
+          <div class="card-visual">
+            <img
+              src="{{ asset('images/IMG_20260319_102401_340.jpg') }}"
+              alt="Visitors trekking through a green canyon trail"
+              width="640"
+              height="400"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="card-body">
+            <div class="card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z"/></svg>
+            </div>
+            <h3>Tourism &amp; local programs</h3>
+            <p>Coordinate guided activities, information sessions, and tourism-related bookings supported by the LGU.</p>
+            <a class="card-link" href="#">Explore programs →</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="visitor-guide">
+    <div class="container">
+      <div class="section-head center">
+        <p class="section-kicker">Nag Atup &amp; visitor access</p>
+        <h2>Visitor guide — before you go</h2>
+        <p>Follow this order so your paperwork matches the official forms published by the LGU. View each PDF below on screen; print or complete as instructed, and bring signed copies when required.</p>
+      </div>
+      <ol class="guide-list">
+        <li class="guide-item">
+          <h3>Review Nag Atup information</h3>
+          <p>Understand site orientation, local rules, fees (if any), and what the LGU expects from guests.</p>
+          <p class="guide-doc">Document: <strong>NAG ATUP INFORMATION.pdf</strong> — <a href="{{ route('docs.view', ['f' => 'NAG ATUP INFORMATION.pdf']) }}">View in page</a></p>
+        </li>
+        <li class="guide-item">
+          <h3>Complete your health declaration</h3>
+          <p>Declare health status truthfully. Keep a copy for your records and submit as instructed by the municipal or tourism desk.</p>
+          <p class="guide-doc">Document: <strong>HEALTH DECLARATION FORM.pdf</strong> — <a href="{{ route('docs.view', ['f' => 'HEALTH DECLARATION FORM.pdf']) }}">View in page</a></p>
+        </li>
+        <li class="guide-item">
+          <h3>Sign the acknowledgement &amp; waiver of risk</h3>
+          <p>Participants in outdoor or adventure activities must acknowledge hazards and sign where the form requires.</p>
+          <p class="guide-doc">Document: <strong>ACKNOWLEDGEMENT AND WAIVER OF RISK.pdf</strong> — <a href="{{ route('docs.view', ['f' => 'ACKNOWLEDGEMENT AND WAIVER OF RISK.pdf']) }}">View in page</a></p>
+        </li>
+        <li class="guide-item">
+          <h3>Secure your visitors entry permit</h3>
+          <p>File the <strong>Nag-Atup Visitors Entry Permit</strong> and wait for confirmation or endorsement before your visit date, unless the LGU directs otherwise.</p>
+          <p class="guide-doc">Document: <strong>NAG-ATUP Visitors Entry Permit.pdf</strong> — <a href="{{ route('docs.view', ['f' => 'NAG-ATUP Visitors Entry Permit.pdf']) }}">View in page</a></p>
+        </li>
+        <li class="guide-item">
+          <h3>Arrive prepared</h3>
+          <p>Bring valid ID, printed permits, and any equipment or companions noted in your application. Follow briefing instructions from guides or marshals.</p>
+        </li>
+      </ol>
+      <p class="guide-note">
+        <strong>Legal wording.</strong> Binding terms, declarations, and signatures are defined in the official PDFs (view in page or open in a PDF reader). Authoritative editable copies may be maintained as Word files offline by the LGU. Replace this summary with verbatim LGU text whenever your legal office finalizes copy for the web.
+      </p>
+    </div>
+  </section>
+
+  <section class="section alt" id="how">
+    <div class="container">
+      <div class="section-head center">
+        <p class="section-kicker">Process</p>
+        <h2>How online booking works</h2>
+        <p>A straightforward workflow so residents and visitors can complete requests with minimal repetition.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Choose your service</h3>
+          <p>Identify the office, facility, or program you need. Review documentary requirements where applicable.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>Select date &amp; time</h3>
+          <p>Pick from published slots. Availability reflects office capacity and venue rules.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Submit &amp; confirm</h3>
+          <p>Provide accurate contact details. You will receive acknowledgment and next steps through the channel you select.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="forms">
+    <div class="container">
+      <div class="section-head center">
+        <p class="section-kicker">Downloads</p>
+        <h2>Official forms &amp; permits</h2>
+        <p>PDF format for reliable in-browser viewing. Use “Open PDF in new tab” to download or print. Original <code>.docx</code> files remain in <strong>public/docs</strong> for staff editing when forms change.</p>
+      </div>
+      <div class="doc-grid">
+        @foreach ($officialDocs as $doc)
+          <article class="doc-card">
+            <span class="doc-step">{{ $doc['step'] }}</span>
+            <h3>{{ $doc['title'] }}</h3>
+            <p>{{ $doc['desc'] }}</p>
+            <a class="btn-doc" href="{{ route('docs.view', ['f' => $doc['file']]) }}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              View in page
+            </a>
+          </article>
+        @endforeach
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-wrap" id="contact">
+    <div class="container">
+      <div class="cta" style="--cta-image: url('{{ asset('images/IMG_20260319_120504_337.jpg') }}');">
+        <h2>Assistance with reservations</h2>
+        <p>
+          For account access, changes to an existing booking, or technical issues with this portal, please reach out to
+          the municipal information desk during regular office hours.
+        </p>
+        <div class="cta-actions">
+          <a href="#" class="btn btn-light">Contact the LGU</a>
+          <a href="#" class="btn btn-ghost">Download citizen charter (PDF)</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-brand-lockup">
+            <img
+              class="footer-logo"
+              src="{{ asset('images/Logo.png') }}"
+              alt=""
+              width="130"
+              height="88"
+              decoding="async"
+            />
+            <div>
+              <p class="name">{{ config('app.name') }}</p>
+              <p>Official booking and information channel of the Local Government of Aborlan, Province of Palawan, Philippines.</p>
+            </div>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h3>Quick links</h3>
+          <ul>
+            <li><a href="#gallery">Gallery</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#visitor-guide">Visitor guide</a></li>
+            <li><a href="#forms">Forms</a></li>
+            <li><a href="#how">How it works</a></li>
+            <li><a href="#contact">Support</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Transparency</h3>
+          <ul>
+            <li><a href="#">Privacy notice</a></li>
+            <li><a href="#">Terms of use</a></li>
+            <li><a href="#">Freedom of Information</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        &copy; {{ date('Y') }} Municipality of Aborlan. All rights reserved.<br />
+        Republic of the Philippines · National Government Portal standards apply where relevant.
+      </div>
+    </div>
+  </footer>
+  <script>
+    (function () {
+      var btn = document.getElementById("nav-toggle");
+      var cluster = document.getElementById("nav-cluster");
+      if (!btn || !cluster) return;
+
+      function setNavOpen(open) {
+        cluster.classList.toggle("is-open", open);
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+        btn.querySelector(".sr-only").textContent = open ? "Close menu" : "Open menu";
+      }
+
+      btn.addEventListener("click", function () {
+        setNavOpen(!cluster.classList.contains("is-open"));
+      });
+
+      cluster.querySelectorAll('a[href^="#"]').forEach(function (a) {
+        a.addEventListener("click", function () {
+          if (window.matchMedia("(max-width: 900px)").matches) {
+            setNavOpen(false);
+          }
+        });
+      });
+
+      window.addEventListener("resize", function () {
+        if (window.innerWidth > 900) {
+          setNavOpen(false);
+        }
+      });
+
+      var sectionIds = ["gallery", "services", "visitor-guide", "how", "forms", "contact"];
+
+      function navStickyOffset() {
+        var topBar = document.querySelector(".top-bar");
+        var header = document.querySelector("header");
+        return (topBar ? topBar.offsetHeight : 0) + (header ? header.offsetHeight : 0) + 12;
+      }
+
+      function sectionDocumentTop(el) {
+        var r = el.getBoundingClientRect();
+        return r.top + window.scrollY;
+      }
+
+      function syncSectionNavActive() {
+        var line = window.scrollY + navStickyOffset();
+        var current = "";
+        sectionIds.forEach(function (id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          if (sectionDocumentTop(el) <= line) current = id;
+        });
+        cluster.querySelectorAll('a[href^="#"]').forEach(function (a) {
+          var href = a.getAttribute("href") || "";
+          var id = href.indexOf("#") === 0 ? href.slice(1) : href.replace(/^.*#/, "");
+          a.classList.toggle("is-active", id === current && current !== "");
+        });
+      }
+
+      window.addEventListener("scroll", syncSectionNavActive, { passive: true });
+      window.addEventListener("resize", syncSectionNavActive);
+      window.addEventListener("hashchange", syncSectionNavActive);
+      window.addEventListener("load", function () {
+        syncSectionNavActive();
+        window.setTimeout(syncSectionNavActive, 150);
+      });
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", syncSectionNavActive);
+      } else {
+        syncSectionNavActive();
+      }
+      requestAnimationFrame(syncSectionNavActive);
+    })();
+
+    (function () {
+      var root = document.querySelector("[data-carousel]");
+      if (!root) return;
+      var track = root.querySelector(".carousel-track");
+      var slides = root.querySelectorAll(".carousel-slide");
+      var dots = root.querySelectorAll(".carousel-dot");
+      var live = root.querySelector(".carousel-live");
+      var prev = root.querySelector(".carousel-prev");
+      var next = root.querySelector(".carousel-next");
+      var i = 0;
+      var n = slides.length;
+      var timer;
+
+      function caption(idx) {
+        var s = slides[idx];
+        return s && s.dataset.caption ? s.dataset.caption : "";
+      }
+
+      function go(idx) {
+        i = (idx + n) % n;
+        track.style.transform = "translateX(-" + i * 100 + "%)";
+        dots.forEach(function (d, j) {
+          d.setAttribute("aria-selected", j === i ? "true" : "false");
+        });
+        if (live) {
+          live.textContent = "Slide " + (i + 1) + " of " + n + ": " + caption(i);
+        }
+      }
+
+      function start() {
+        stop();
+        timer = setInterval(function () {
+          go(i + 1);
+        }, 6500);
+      }
+
+      function stop() {
+        if (timer) clearInterval(timer);
+        timer = null;
+      }
+
+      if (prev) prev.addEventListener("click", function () { go(i - 1); });
+      if (next) next.addEventListener("click", function () { go(i + 1); });
+      dots.forEach(function (d, j) {
+        d.addEventListener("click", function () { go(j); });
+      });
+      root.addEventListener("mouseenter", stop);
+      root.addEventListener("mouseleave", start);
+      root.addEventListener("focusin", stop);
+      root.addEventListener("focusout", function (e) {
+        if (!root.contains(e.relatedTarget)) start();
+      });
+      go(0);
+      start();
+    })();
+  </script>
+</body>
+</html>
