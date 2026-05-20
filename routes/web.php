@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\HomeGalleryController as AdminHomeGalleryController;
 use App\Http\Controllers\Admin\QuotaController as AdminQuotaController;
+use App\Http\Controllers\Admin\TourGuideController as AdminTourGuideController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AtupAtupController;
@@ -70,6 +71,12 @@ Route::prefix('admin')
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
         Route::post('/users/{user}/toggle-admin', [AdminUserController::class, 'toggleAdmin'])->name('users.toggleAdmin');
+        Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+
+        Route::get('/tour-guides', [AdminTourGuideController::class, 'index'])->name('tour-guides.index');
+        Route::post('/tour-guides', [AdminTourGuideController::class, 'store'])->name('tour-guides.store');
+        Route::patch('/tour-guides/{tourGuide}', [AdminTourGuideController::class, 'update'])->name('tour-guides.update');
+        Route::delete('/tour-guides/{tourGuide}', [AdminTourGuideController::class, 'destroy'])->name('tour-guides.destroy');
 
         Route::get('/quotas', [AdminQuotaController::class, 'index'])->name('quotas.index');
         Route::post('/quotas/default', [AdminQuotaController::class, 'updateDefault'])->name('quotas.default');

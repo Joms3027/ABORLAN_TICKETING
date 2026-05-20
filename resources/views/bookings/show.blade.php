@@ -55,6 +55,16 @@
       </div>
     @endif
 
+    @if ($booking->status === 'approved' && $booking->tourGuide)
+      <div class="alert alert-success" style="margin-top:1.1rem;">
+        <strong>Your tour guide:</strong>
+        {{ $booking->tourGuide->name }} (age {{ $booking->tourGuide->age }})
+        <div style="margin-top: 0.25rem; font-size: 0.9rem;">Assigned for your group on hike day. Please coordinate with your guide at the jump-off point.</div>
+      </div>
+    @endif
+
+    @include('bookings.partials.permit-details')
+
     <div class="form-actions">
       <a href="{{ route('bookings.index') }}" class="btn btn-secondary">Back to my bookings</a>
 
@@ -71,7 +81,8 @@
     <div class="panel-head"><h2>What to bring on hike day</h2></div>
     <ul style="padding-left: 1.1rem; display:grid; gap:0.4rem; color: var(--text);">
       <li>Valid ID (any government-issued ID).</li>
-      <li>Printed or screenshot of this booking with reference <strong>{{ $booking->reference_code }}</strong>.</li>
+      <li>Printed or screenshot of this booking with reference <strong>{{ $booking->reference_code }}</strong> and your completed Visitors Entry Permit details.</li>
+      <li>Health declaration and waiver of risk forms if required by the LGU (<a href="{{ route('docs.view', ['f' => 'HEALTH DECLARATION FORM.pdf']) }}">health</a>, <a href="{{ route('docs.view', ['f' => 'ACKNOWLEDGEMENT AND WAIVER OF RISK.pdf']) }}">waiver</a>).</li>
       <li>Drinking water, light snacks, and sturdy shoes for trekking.</li>
       <li>A small bag for trash — please pack out everything you bring in.</li>
       <li>Arrive at <strong>Sitio Manaile, Brgy. Dumanguena, Narra, Palawan</strong> by 7:00 AM unless instructed otherwise.</li>

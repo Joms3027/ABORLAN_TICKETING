@@ -40,7 +40,7 @@
     }
 
     html {
-      scroll-behavior: smooth;
+      scroll-behavior: auto;
     }
 
     /* Anchor targets clear sticky top bar + header */
@@ -53,7 +53,6 @@
       font-family: var(--font);
       color: var(--text);
       background: linear-gradient(165deg, var(--bg-subtle) 0%, #fff4e6 35%, #fdf4ff 70%, #fef9c3 100%);
-      background-attachment: fixed;
       line-height: 1.65;
       font-size: 1.0625rem;
       -webkit-font-smoothing: antialiased;
@@ -702,11 +701,10 @@
     }
 
     .hero-card {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.22);
       border-radius: var(--radius);
       padding: 1.5rem 1.5rem 1.35rem;
-      backdrop-filter: blur(16px);
     }
 
     .hero-card h2 {
@@ -1157,13 +1155,12 @@
       height: 44px;
       border-radius: 50%;
       border: 1px solid rgba(255, 255, 255, 0.35);
-      background: rgba(42, 10, 50, 0.45);
+      background: rgba(42, 10, 50, 0.72);
       color: #fff;
       cursor: pointer;
       display: grid;
       place-items: center;
       transition: background 0.2s var(--ease), transform 0.15s var(--ease);
-      backdrop-filter: blur(8px);
     }
 
     .carousel-btn:hover {
@@ -2002,26 +1999,30 @@
       });
 
       var sectionIds = ["gallery", "services", "visitor-guide", "how", "forms", "contact"];
+      var sectionTops = [];
+      var stickyOffset = 0;
+      var activeSectionId = "";
+      var scrollScheduled = false;
 
-      function navStickyOffset() {
+      function measureSections() {
         var topBar = document.querySelector(".top-bar");
         var header = document.querySelector("header");
-        return (topBar ? topBar.offsetHeight : 0) + (header ? header.offsetHeight : 0) + 12;
-      }
-
-      function sectionDocumentTop(el) {
-        var r = el.getBoundingClientRect();
-        return r.top + window.scrollY;
+        stickyOffset = (topBar ? topBar.offsetHeight : 0) + (header ? header.offsetHeight : 0) + 12;
+        sectionTops = sectionIds.map(function (id) {
+          var el = document.getElementById(id);
+          if (!el) return null;
+          return { id: id, top: el.getBoundingClientRect().top + window.scrollY };
+        }).filter(Boolean);
       }
 
       function syncSectionNavActive() {
-        var line = window.scrollY + navStickyOffset();
+        var line = window.scrollY + stickyOffset;
         var current = "";
-        sectionIds.forEach(function (id) {
-          var el = document.getElementById(id);
-          if (!el) return;
-          if (sectionDocumentTop(el) <= line) current = id;
-        });
+        for (var i = 0; i < sectionTops.length; i++) {
+          if (sectionTops[i].top <= line) current = sectionTops[i].id;
+        }
+        if (current === activeSectionId) return;
+        activeSectionId = current;
         cluster.querySelectorAll('a[href^="#"]').forEach(function (a) {
           var href = a.getAttribute("href") || "";
           var id = href.indexOf("#") === 0 ? href.slice(1) : href.replace(/^.*#/, "");
@@ -2029,19 +2030,33 @@
         });
       }
 
-      window.addEventListener("scroll", syncSectionNavActive, { passive: true });
-      window.addEventListener("resize", syncSectionNavActive);
-      window.addEventListener("hashchange", syncSectionNavActive);
-      window.addEventListener("load", function () {
-        syncSectionNavActive();
-        window.setTimeout(syncSectionNavActive, 150);
-      });
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", syncSectionNavActive);
-      } else {
+      function scheduleSectionNavSync() {
+        if (scrollScheduled) return;
+        scrollScheduled = true;
+        requestAnimationFrame(function () {
+          scrollScheduled = false;
+          syncSectionNavActive();
+        });
+      }
+
+      function remeasureAndSync() {
+        measureSections();
+        activeSectionId = "";
         syncSectionNavActive();
       }
-      requestAnimationFrame(syncSectionNavActive);
+
+      window.addEventListener("scroll", scheduleSectionNavSync, { passive: true });
+      window.addEventListener("resize", remeasureAndSync);
+      window.addEventListener("hashchange", remeasureAndSync);
+      window.addEventListener("load", function () {
+        remeasureAndSync();
+        window.setTimeout(remeasureAndSync, 150);
+      });
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", remeasureAndSync);
+      } else {
+        remeasureAndSync();
+      }
     })();
 
     (function () {

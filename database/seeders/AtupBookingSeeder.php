@@ -17,6 +17,11 @@ class AtupBookingSeeder extends Seeder
             ['value' => '20']
         );
 
+        AppSetting::updateOrCreate(
+            ['key' => BookingAvailability::DEFAULT_MAX_BOOKINGS_KEY],
+            ['value' => '0']
+        );
+
         User::updateOrCreate(
             ['email' => 'admin@aborlan.gov.ph'],
             [

@@ -1,68 +1,79 @@
-@extends('layouts.portal')
+@extends('layouts.admin')
 
-@section('title', 'Manage bookings')
+@section('title', 'Bookings')
+
+@section('breadcrumb')
+  <a href="{{ route('admin.dashboard') }}">Dashboard</a>
+  <span aria-hidden="true">/</span>
+  <span>Bookings</span>
+@endsection
 
 @section('content')
-  <div class="layout-shell">
-    @include('admin.partials.side-nav')
+  <div class="page-header">
+    <h1>Bookings</h1>
+    <p>Approve, reject, or review hiking permit applications.</p>
+  </div>
 
-    <div>
-      <div class="page-header">
-        <h1>Bookings</h1>
-        <p>Approve, reject, or review hiking permit applications submitted by visitors.</p>
-      </div>
+  <div class="panel">
+    <nav class="status-tabs" aria-label="Filter by status">
+      <a href="{{ route('admin.bookings.index', request()->only('q')) }}" class="{{ ! $status ? 'is-active' : '' }}">All</a>
+      @foreach (['pending','approved','rejected','cancelled','completed'] as $s)
+        <a href="{{ route('admin.bookings.index', array_filter(['status' => $s, 'q' => $q])) }}" class="{{ $status === $s ? 'is-active' : '' }}">{{ ucfirst($s) }}</a>
+      @endforeach
+    </nav>
 
-      <div class="panel">
-        <form method="GET" action="{{ route('admin.bookings.index') }}" style="display:flex; flex-wrap:wrap; gap:0.6rem; margin-bottom:1rem;">
-          <input type="search" name="q" class="input" placeholder="Search by reference, name, or email" value="{{ $q }}" style="flex: 1; min-width: 220px;" />
-          <select name="status" class="select" style="max-width: 200px;">
-            <option value="">All statuses</option>
-            @foreach (['pending','approved','rejected','cancelled','completed'] as $s)
-              <option value="{{ $s }}" {{ $status === $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>
+    <form method="GET" action="{{ route('admin.bookings.index') }}" class="filter-bar">
+      @if ($status)<input type="hidden" name="status" value="{{ $status }}" />@endif
+      <input type="search" name="q" class="input" placeholder="Search reference, name, or email" value="{{ $q }}" />
+      <button type="submit" class="btn btn-primary">Search</button>
+      <a class="btn btn-secondary" href="{{ route('admin.bookings.index') }}">Reset</a>
+    </form>
+
+    @if ($bookings->isEmpty())
+      <p class="empty-state">No bookings match the current filters.</p>
+    @else
+      <div class="table-wrap">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Reference</th>
+              <th>User</th>
+              <th>Hike date</th>
+              <th>Party</th>
+              <th>Status</th>
+              <th>Tour guide</th>
+              <th>Submitted</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach ($bookings as $b)
+              <tr>
+                <td><strong>{{ $b->reference_code }}</strong></td>
+                <td>
+                  {{ $b->user?->name ?? '—' }}
+                  @if ($b->user?->email)<div class="sub">{{ $b->user->email }}</div>@endif
+                </td>
+                <td>{{ $b->hike_date->format('M j, Y') }}</td>
+                <td>{{ $b->party_size }}</td>
+                <td><span class="pill pill-{{ $b->status }}">{{ $b->statusLabel() }}</span></td>
+                <td>
+                  @if ($b->status === 'approved' && $b->tourGuide)
+                    {{ $b->tourGuide->name }}
+                  @elseif ($b->status === 'approved')
+                    <span class="muted" style="color: var(--danger); font-size: 0.8rem;">Unassigned</span>
+                  @else
+                    —
+                  @endif
+                </td>
+                <td>{{ $b->created_at->format('M j, Y') }}</td>
+                <td><a class="btn btn-secondary btn-sm" href="{{ route('admin.bookings.show', $b) }}">Review</a></td>
+              </tr>
             @endforeach
-          </select>
-          <button type="submit" class="btn btn-primary">Filter</button>
-          <a class="btn btn-secondary" href="{{ route('admin.bookings.index') }}">Reset</a>
-        </form>
-
-        @if ($bookings->isEmpty())
-          <p style="color: var(--text-muted);">No bookings match the current filters.</p>
-        @else
-          <div class="table-wrap">
-            <table class="data">
-              <thead>
-                <tr>
-                  <th>Reference</th>
-                  <th>User</th>
-                  <th>Hike date</th>
-                  <th>Party</th>
-                  <th>Status</th>
-                  <th>Submitted</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                @foreach ($bookings as $b)
-                  <tr>
-                    <td><strong>{{ $b->reference_code }}</strong></td>
-                    <td>
-                      <div>{{ $b->user?->name ?? '—' }}</div>
-                      <div class="hint" style="font-size:0.78rem; color: var(--text-muted);">{{ $b->user?->email }}</div>
-                    </td>
-                    <td>{{ $b->hike_date->format('M j, Y') }}</td>
-                    <td>{{ $b->party_size }}</td>
-                    <td><span class="pill pill-{{ $b->status }}">{{ $b->statusLabel() }}</span></td>
-                    <td>{{ $b->created_at->format('M j, Y') }}</td>
-                    <td><a class="btn btn-secondary btn-sm" href="{{ route('admin.bookings.show', $b) }}">Review</a></td>
-                  </tr>
-                @endforeach
-              </tbody>
-            </table>
-          </div>
-
-          <div>{{ $bookings->links() }}</div>
-        @endif
+          </tbody>
+        </table>
       </div>
-    </div>
+      <div>{{ $bookings->links() }}</div>
+    @endif
   </div>
 @endsection

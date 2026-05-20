@@ -32,7 +32,7 @@ class UserController extends Controller
 
     public function show(User $user): View
     {
-        $user->load(['bookings' => fn ($q) => $q->latest('id')]);
+        $user->load(['bookings' => fn ($q) => $q->latest('hike_date')->latest('id')]);
 
         return view('admin.users.show', [
             'user' => $user,
@@ -48,5 +48,19 @@ class UserController extends Controller
         $user->update(['is_admin' => ! $user->is_admin]);
 
         return back()->with('status', $user->name.' is now '.($user->is_admin ? 'an administrator' : 'a regular user').'.');
+    }
+
+    public function destroy(Request $request, User $user): RedirectResponse
+    {
+        if ($request->user()->id === $user->id) {
+            return back()->withErrors(['user' => 'You cannot delete your own account.']);
+        }
+
+        $name = $user->name;
+        $user->delete();
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('status', $name.' has been removed.');
     }
 }

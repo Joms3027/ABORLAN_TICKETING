@@ -39,7 +39,6 @@
       font-family: var(--font);
       color: var(--text);
       background: linear-gradient(165deg, var(--bg-subtle) 0%, #fff4e6 35%, #fdf4ff 70%, #fef9c3 100%);
-      background-attachment: fixed;
       line-height: 1.6;
       font-size: 1rem;
       -webkit-font-smoothing: antialiased;

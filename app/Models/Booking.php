@@ -17,10 +17,16 @@ class Booking extends Model
     protected $fillable = [
         'reference_code',
         'user_id',
+        'tour_guide_id',
         'hike_date',
         'party_size',
         'contact_phone',
         'emergency_contact',
+        'visitor_address',
+        'purpose_of_visit',
+        'trekking_route',
+        'trekking_days',
+        'members',
         'notes',
         'status',
         'admin_notes',
@@ -30,12 +36,18 @@ class Booking extends Model
     protected $casts = [
         'hike_date'  => 'date',
         'party_size' => 'integer',
+        'members'    => 'array',
         'decided_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function tourGuide(): BelongsTo
+    {
+        return $this->belongsTo(TourGuide::class);
     }
 
     public function scopeActive(Builder $query): Builder

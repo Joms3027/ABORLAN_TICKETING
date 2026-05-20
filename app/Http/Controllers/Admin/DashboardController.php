@@ -21,7 +21,8 @@ class DashboardController extends Controller
             'today_active'   => Booking::active()->forDate($today)->sum('party_size'),
             'total_users'    => User::where('is_admin', false)->count(),
             'total_bookings' => Booking::count(),
-            'default_quota'  => BookingAvailability::defaultQuota(),
+            'default_quota'       => BookingAvailability::defaultQuota(),
+            'default_max_bookings'  => BookingAvailability::defaultMaxBookings(),
         ];
 
         $recentBookings = Booking::with('user')

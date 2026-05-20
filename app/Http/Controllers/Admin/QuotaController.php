@@ -34,39 +34,56 @@ class QuotaController extends Controller
         }
 
         return view('admin.quotas.index', [
-            'availability'    => $availability,
-            'defaultQuota'    => $defaultQuota,
-            'customDates'     => $customDates,
-            'quotaPresetDate' => $quotaPresetDate,
+            'availability'       => $availability,
+            'defaultQuota'       => $defaultQuota,
+            'defaultMaxBookings' => BookingAvailability::defaultMaxBookings(),
+            'customDates'        => $customDates,
+            'quotaPresetDate'    => $quotaPresetDate,
         ]);
     }
 
     public function updateDefault(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'default_quota' => ['required', 'integer', 'min:0', 'max:500'],
+            'default_quota'        => ['required', 'integer', 'min:0', 'max:500'],
+            'default_max_bookings' => ['required', 'integer', 'min:0', 'max:500'],
         ]);
 
         AppSetting::put(BookingAvailability::DEFAULT_QUOTA_KEY, (int) $data['default_quota']);
+        AppSetting::put(BookingAvailability::DEFAULT_MAX_BOOKINGS_KEY, (int) $data['default_max_bookings']);
+
+        $capMsg = (int) $data['default_max_bookings'] > 0
+            ? (int) $data['default_max_bookings'].' bookings per day.'
+            : 'no separate cap on bookings per day (only persons per day).';
 
         return redirect()
             ->route('admin.quotas.index')
-            ->with('status', 'Default daily quota set to '.$data['default_quota'].' visitors per day.');
+            ->with('status', 'Defaults updated: '.$data['default_quota'].' persons per day, '.$capMsg);
     }
 
     public function upsertDate(Request $request): RedirectResponse
     {
+        if ($request->input('max_bookings') === '' || $request->input('max_bookings') === null) {
+            $request->merge(['max_bookings' => null]);
+        }
+
         $data = $request->validate([
-            'quota_date' => ['required', 'date', 'after_or_equal:today'],
-            'slots'      => ['required', 'integer', 'min:0', 'max:500'],
-            'note'       => ['nullable', 'string', 'max:160'],
+            'quota_date'   => ['required', 'date', 'after_or_equal:today'],
+            'slots'        => ['required', 'integer', 'min:0', 'max:500'],
+            'max_bookings' => ['nullable', 'integer', 'min:0', 'max:500'],
+            'note'         => ['nullable', 'string', 'max:160'],
         ]);
+
+        $maxBookings = isset($data['max_bookings']) && $data['max_bookings'] !== null
+            ? (int) $data['max_bookings']
+            : null;
 
         DailyQuota::updateOrCreate(
             ['quota_date' => Carbon::parse($data['quota_date'])->toDateString()],
             [
-                'slots' => (int) $data['slots'],
-                'note'  => $data['note'] ?? null,
+                'slots'        => (int) $data['slots'],
+                'max_bookings' => $maxBookings,
+                'note'         => $data['note'] ?? null,
             ]
         );
 
