@@ -69,7 +69,7 @@
       @if ($recentBookings->isEmpty())
         <p class="empty-state">No bookings have been submitted yet.</p>
       @else
-        <div class="table-wrap">
+        <div class="table-wrap table-cards">
           <table class="data">
             <thead>
               <tr>
@@ -83,16 +83,16 @@
             <tbody>
               @foreach ($recentBookings as $b)
                 <tr>
-                  <td><a href="{{ route('admin.bookings.show', $b) }}"><strong>{{ $b->reference_code }}</strong></a></td>
-                  <td>
+                  <td data-label="Reference"><a href="{{ route('admin.bookings.show', $b) }}"><strong>{{ $b->reference_code }}</strong></a></td>
+                  <td data-label="User">
                     {{ $b->user?->name ?? '—' }}
                     @if ($b->user?->email)
                       <div class="sub">{{ $b->user->email }}</div>
                     @endif
                   </td>
-                  <td>{{ $b->hike_date->format('M j, Y') }}</td>
-                  <td>{{ $b->party_size }}</td>
-                  <td><span class="pill pill-{{ $b->status }}">{{ $b->statusLabel() }}</span></td>
+                  <td data-label="Date">{{ $b->hike_date->format('M j, Y') }}</td>
+                  <td data-label="Party">{{ $b->party_size }}</td>
+                  <td data-label="Status"><span class="pill pill-{{ $b->status }}">{{ $b->statusLabel() }}</span></td>
                 </tr>
               @endforeach
             </tbody>

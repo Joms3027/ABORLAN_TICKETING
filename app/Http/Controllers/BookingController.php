@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\BookingFeedback;
 use App\Services\BookingAvailability;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -17,12 +20,29 @@ class BookingController extends Controller
     {
         $bookings = $request->user()
             ->bookings()
+            ->with('feedback')
             ->orderByDesc('hike_date')
             ->orderByDesc('id')
             ->get();
 
+        $nextHike = $bookings
+            ->where('status', Booking::STATUS_APPROVED)
+            ->filter(fn (Booking $b) => $b->hike_date?->isFuture())
+            ->sortBy('hike_date')
+            ->first();
+
         return view('bookings.index', [
-            'bookings' => $bookings,
+            'bookings'  => $bookings,
+            'nextHike'  => $nextHike,
+            'stats'     => [
+                'total'              => $bookings->count(),
+                'pending'            => $bookings->where('status', Booking::STATUS_PENDING)->count(),
+                'approved_upcoming'  => $bookings
+                    ->where('status', Booking::STATUS_APPROVED)
+                    ->filter(fn (Booking $b) => $b->hike_date?->isFuture())
+                    ->count(),
+                'feedback_available' => $bookings->filter(fn (Booking $b) => $b->canReceiveFeedback())->count(),
+            ],
         ]);
     }
 
@@ -57,13 +77,23 @@ class BookingController extends Controller
             'members.*.emergency_contact'   => ['required', 'string', 'max:160'],
             'members.*.body_marks'          => ['nullable', 'string', 'max:255'],
             'permit_rules_ack'  => ['accepted'],
+            'health_declarations' => ['required', 'array'],
             'notes'             => ['nullable', 'string', 'max:1000'],
         ], [
             'permit_rules_ack.accepted' => 'You must confirm that you have read and agree to the Nag-Atup rules and regulations.',
             'members.required'          => 'Enter details for each person in your group (as on the Visitors Entry Permit).',
+            'health_declarations.required' => 'Complete the health declaration for your group before submitting.',
         ]);
 
         $partySize = (int) $data['party_size'];
+        $healthKeys = array_merge(array_keys(config('health_declaration.checklist')), ['waiver_acknowledged']);
+        $healthRules = [];
+        foreach ($healthKeys as $key) {
+            $healthRules["health_declarations.0.$key"] = ['accepted'];
+        }
+        $request->validate($healthRules, [
+            'health_declarations.0.*.accepted' => 'Complete every item on the health declaration form.',
+        ]);
         if (count($data['members']) !== $partySize) {
             return back()->withInput()->withErrors([
                 'members' => 'Provide exactly '.$partySize.' visitor record'.($partySize === 1 ? '' : 's').' — one per person in your group.',
@@ -84,6 +114,8 @@ class BookingController extends Controller
                 'body_marks'        => trim((string) ($member['body_marks'] ?? '')) ?: null,
             ];
         })->values()->all();
+
+        $healthDeclarations = $this->normalizeHealthDeclarations($data['health_declarations'], $members);
 
         $hikeDate  = Carbon::parse($data['hike_date']);
         $partySize = (int) $data['party_size'];
@@ -117,7 +149,7 @@ class BookingController extends Controller
         }
 
         try {
-            $booking = DB::transaction(function () use ($request, $data, $hikeDate, $partySize, $trekkingDays, $members) {
+            $booking = DB::transaction(function () use ($request, $data, $hikeDate, $partySize, $trekkingDays, $members, $healthDeclarations) {
                 $quota  = BookingAvailability::quotaForDate($hikeDate);
                 $booked = BookingAvailability::bookedSlotsForDate($hikeDate);
 
@@ -154,8 +186,9 @@ class BookingController extends Controller
                     'purpose_of_visit'  => $data['purpose_of_visit'],
                     'trekking_route'    => $data['trekking_route'],
                     'trekking_days'     => $trekkingDays,
-                    'members'           => $members,
-                    'notes'             => $data['notes'] ?? null,
+                    'members'              => $members,
+                    'health_declarations'  => $healthDeclarations,
+                    'notes'                => $data['notes'] ?? null,
                     'status'            => Booking::STATUS_PENDING,
                 ]);
             });
@@ -172,11 +205,51 @@ class BookingController extends Controller
     {
         abort_unless($booking->user_id === $request->user()->id, 403);
 
-        $booking->load('tourGuide');
+        $booking->load(['tourGuide', 'feedback']);
 
         return view('bookings.show', [
             'booking' => $booking,
         ]);
+    }
+
+    public function storeFeedback(Request $request, Booking $booking): RedirectResponse
+    {
+        abort_unless($booking->user_id === $request->user()->id, 403);
+
+        if (! $booking->canReceiveFeedback()) {
+            return back()->withErrors(['feedback' => 'Feedback is not available for this booking.']);
+        }
+
+        $rules = [
+            'rating_hospitality' => ['required', 'integer', 'min:1', 'max:5'],
+            'rating_place'       => ['required', 'integer', 'min:1', 'max:5'],
+            'comment'            => ['nullable', 'string', 'max:2000'],
+        ];
+
+        if ($booking->tour_guide_id) {
+            $rules['rating_tour_guide'] = ['required', 'integer', 'min:1', 'max:5'];
+        } else {
+            $rules['rating_tour_guide'] = ['nullable', 'integer', 'min:1', 'max:5'];
+        }
+
+        $data = $request->validate($rules, [
+            'rating_hospitality.required' => 'Please rate the hospitality you received.',
+            'rating_tour_guide.required'  => 'Please rate your tour guide.',
+            'rating_place.required'       => 'Please rate the place you visited.',
+        ]);
+
+        BookingFeedback::create([
+            'booking_id'          => $booking->id,
+            'user_id'             => $request->user()->id,
+            'rating_hospitality'  => (int) $data['rating_hospitality'],
+            'rating_tour_guide'   => isset($data['rating_tour_guide']) ? (int) $data['rating_tour_guide'] : null,
+            'rating_place'        => (int) $data['rating_place'],
+            'comment'             => $data['comment'] ?? null,
+        ]);
+
+        return redirect()
+            ->route('bookings.show', $booking)
+            ->with('status', 'Thank you! Your feedback has been submitted.');
     }
 
     public function cancel(Request $request, Booking $booking): RedirectResponse
@@ -196,5 +269,53 @@ class BookingController extends Controller
         return redirect()
             ->route('bookings.index')
             ->with('status', 'Booking '.$booking->reference_code.' has been cancelled.');
+    }
+
+    public function downloadPermit(Request $request, Booking $booking): Response
+    {
+        abort_unless($booking->user_id === $request->user()->id, 403);
+
+        $pdf = Pdf::loadView('bookings.partials.permit-pdf', [
+            'booking' => $booking,
+        ]);
+
+        $pdf->setPaper('letter', 'portrait');
+
+        $filename = 'Visitors-Entry-Permit-'.$booking->reference_code.'.pdf';
+
+        if ($request->query('preview')) {
+            return $pdf->stream($filename);
+        }
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * One group health declaration applies to the entire party.
+     *
+     * @param  array<int, array<string, mixed>>  $submitted
+     * @param  array<int, array<string, mixed>>  $members
+     * @return array<int, array<string, mixed>>
+     */
+    private function normalizeHealthDeclarations(array $submitted, array $members): array
+    {
+        $checklistKeys = array_keys(config('health_declaration.checklist'));
+        $declaredAt    = now()->toIso8601String();
+        $entry         = $submitted[0] ?? reset($submitted) ?: [];
+
+        $checklist = [];
+        foreach ($checklistKeys as $key) {
+            $checklist[$key] = ! empty($entry[$key]);
+        }
+
+        $declaredBy = trim((string) ($entry['member_name'] ?? ($members[0]['name'] ?? '')));
+
+        return [[
+            'declared_by'         => $declaredBy !== '' ? $declaredBy : null,
+            'party_size'          => count($members),
+            'checklist'           => $checklist,
+            'waiver_acknowledged' => ! empty($entry['waiver_acknowledged']),
+            'declared_at'         => $declaredAt,
+        ]];
     }
 }

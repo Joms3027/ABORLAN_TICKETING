@@ -55,7 +55,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create');
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::get('/bookings/{booking}/permit', [BookingController::class, 'downloadPermit'])->name('bookings.permit');
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+    Route::post('/bookings/{booking}/feedback', [BookingController::class, 'storeFeedback'])->name('bookings.feedback.store');
 });
 
 Route::prefix('admin')

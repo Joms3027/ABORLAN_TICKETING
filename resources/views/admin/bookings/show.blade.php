@@ -91,23 +91,63 @@
     </div>
 
     <div class="panel">
-      <div class="panel-head"><h2>Update status</h2></div>
-      <form method="POST" action="{{ route('admin.bookings.update', $booking) }}">
+      <div class="panel-head">
+        <h2>Update status</h2>
+        <span class="pill pill-{{ $booking->status }}">{{ $booking->statusLabel() }}</span>
+      </div>
+
+      <div class="field">
+        <label for="admin_notes">Notes for the hiker (optional)</label>
+        <textarea
+          id="admin_notes"
+          name="admin_notes"
+          class="textarea"
+          placeholder="Visible to the hiker when saved."
+          form="approve-booking reject-booking update-booking"
+        >{{ old('admin_notes', $booking->admin_notes) }}</textarea>
+      </div>
+
+      @if ($booking->status === 'pending')
+        <div class="form-actions" style="margin-top: 0.85rem;">
+          <form id="approve-booking" method="POST" action="{{ route('admin.bookings.update', $booking) }}">
+            @csrf
+            @method('PATCH')
+            <input type="hidden" name="status" value="approved" />
+            <button type="submit" class="btn btn-success">Approve</button>
+          </form>
+          <form id="reject-booking" method="POST" action="{{ route('admin.bookings.update', $booking) }}" onsubmit="return confirm('Reject this permit application?');">
+            @csrf
+            @method('PATCH')
+            <input type="hidden" name="status" value="rejected" />
+            <button type="submit" class="btn btn-danger">Reject</button>
+          </form>
+        </div>
+      @endif
+
+      <form id="update-booking" method="POST" action="{{ route('admin.bookings.update', $booking) }}" style="margin-top: 1rem;">
         @csrf
         @method('PATCH')
 
+        @php
+          $statusOptions = match ($booking->status) {
+            'pending'   => ['pending' => 'Pending review', 'cancelled' => 'Cancelled'],
+            'approved'  => ['cancelled' => 'Cancelled', 'completed' => 'Mark completed'],
+            'rejected'  => ['pending' => 'Pending review', 'cancelled' => 'Cancelled'],
+            'cancelled' => ['pending' => 'Pending review', 'completed' => 'Mark completed'],
+            'completed' => ['cancelled' => 'Cancelled'],
+            default     => ['cancelled' => 'Cancelled'],
+          };
+        @endphp
         <div class="field">
-          <label for="status">Status</label>
+          <label for="status">Change status</label>
           <select id="status" name="status" class="select">
-            @foreach (['pending'=>'Pending review','approved'=>'Approve','rejected'=>'Reject','cancelled'=>'Cancelled','completed'=>'Mark completed'] as $val => $label)
-              <option value="{{ $val }}" {{ old('status', $booking->status) === $val ? 'selected' : '' }}>{{ $label }}</option>
+            @foreach ($statusOptions as $val => $label)
+              <option value="{{ $val }}" {{ old('status') === $val ? 'selected' : '' }}>{{ $label }}</option>
             @endforeach
           </select>
-        </div>
-
-        <div class="field" style="margin-top: 0.85rem;">
-          <label for="admin_notes">Notes for the hiker (optional)</label>
-          <textarea id="admin_notes" name="admin_notes" class="textarea" placeholder="Visible to the hiker when saved.">{{ old('admin_notes', $booking->admin_notes) }}</textarea>
+          @if ($booking->status === 'pending')
+            <p class="hint">Use Approve or Reject above for pending applications.</p>
+          @endif
         </div>
 
         <div class="form-actions">
@@ -119,4 +159,15 @@
   </div>
 
   @include('bookings.partials.permit-details')
+  @include('bookings.partials.health-declaration-summary')
+
+  @if ($booking->feedback)
+    <div class="panel" style="margin-top: 1.25rem;">
+      <div class="panel-head"><h2>Visitor feedback</h2></div>
+      <p class="detail-value muted" style="margin-bottom: 1rem;">
+        Submitted by {{ $booking->user?->name }} on {{ $booking->feedback->created_at->format('M j, Y g:i A') }}
+      </p>
+      @include('bookings.partials.feedback-display')
+    </div>
+  @endif
 @endsection

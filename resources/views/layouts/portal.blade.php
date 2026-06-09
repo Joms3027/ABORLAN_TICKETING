@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>@yield('title', 'Atup-atup Falls Booking') · {{ config('app.name') }}</title>
+  <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
@@ -33,9 +34,12 @@
       --success: #16a34a;
       --warn: #d97706;
       --danger: #dc2626;
+      --sidebar-bg: linear-gradient(180deg, #2a0a32 0%, #1a0520 55%, #0f172a 100%);
+      --sidebar-width: 260px;
+      --topbar-h: 64px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
+    body.portal-body {
       font-family: var(--font);
       color: var(--text);
       background: linear-gradient(165deg, var(--bg-subtle) 0%, #fff4e6 35%, #fdf4ff 70%, #fef9c3 100%);
@@ -43,91 +47,253 @@
       font-size: 1rem;
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
-      display: flex; flex-direction: column;
+      overflow-x: clip;
     }
     a { color: var(--teal-hover); }
     a:hover { color: var(--navy); }
     .container { width: min(94%, 1180px); margin-inline: auto; }
 
-    /* Top bar */
-    .top-bar {
-      background: linear-gradient(115deg, #4c0519 0%, #701a75 38%, #1e1b4b 100%);
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 0.8125rem;
-      font-weight: 500;
-      box-shadow: inset 0 -2px 0 var(--gold-light);
+    /* App shell */
+    .portal-app {
+      display: grid;
+      grid-template-columns: 1fr;
+      min-height: 100vh;
     }
-    .top-bar .container {
-      display: flex; flex-wrap: wrap;
-      justify-content: space-between; align-items: center;
-      gap: 0.5rem 1.5rem; padding: 0.45rem 0;
+    @media (min-width: 960px) {
+      .portal-app { grid-template-columns: var(--sidebar-width) 1fr; }
     }
-    .top-bar strong { color: var(--gold-light); font-weight: 700; }
 
-    /* Header */
-    header.site-header {
-      position: sticky; top: 0; z-index: 50;
-      background: #fff;
-      box-shadow: 0 4px 20px rgba(88, 28, 135, 0.06);
+    /* Sidebar */
+    .portal-sidebar {
+      background: var(--sidebar-bg);
+      color: rgba(255, 255, 255, 0.88);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: min(88vw, var(--sidebar-width));
+      z-index: 100;
+      transform: translateX(-100%);
+      transition: transform 0.25s var(--ease);
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
     }
-    header.site-header::after {
-      content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px;
-      background: linear-gradient(90deg, var(--gold-light), var(--teal), var(--magenta-bright), var(--gold-light));
+    .portal-app.sidebar-open .portal-sidebar { transform: translateX(0); }
+    @media (min-width: 960px) {
+      .portal-sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        transform: none;
+        box-shadow: none;
+      }
     }
-    .nav {
-      display: flex; flex-wrap: wrap; align-items: center;
-      gap: 0.75rem 1.25rem; padding: 0.85rem 0;
+    .portal-sidebar-brand {
+      padding: 1.25rem 1.15rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .brand {
-      display: flex; align-items: center; gap: 0.875rem;
-      text-decoration: none; color: inherit;
-    }
-    .brand-logo { height: 64px; width: auto; max-width: 240px; object-fit: contain; flex-shrink: 0; }
-    .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
-    .brand-text .name { font-weight: 700; font-size: 1.05rem; color: var(--navy); }
-    .brand-text .tag { font-size: 0.72rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
-
-    .nav-links { display: flex; flex-wrap: wrap; gap: 0.25rem; list-style: none; margin-left: auto; align-items: center; }
-    .nav-links a {
+    .portal-sidebar-brand a {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #fff;
       text-decoration: none;
-      color: var(--navy);
-      font-weight: 600;
-      font-size: 0.875rem;
-      padding: 0.45rem 0.85rem;
-      border-radius: 999px;
-      transition: background 0.2s var(--ease), color 0.2s var(--ease);
     }
-    .nav-links a:hover { background: rgba(255, 234, 0, 0.45); color: var(--navy); }
-    .nav-links a.is-active { background: rgba(192, 38, 211, 0.18); box-shadow: inset 0 0 0 2px var(--teal); }
-    .nav-links .accent a {
+    .portal-sidebar-brand a:hover { color: var(--gold-light); }
+    .portal-sidebar-brand img {
+      height: 44px;
+      width: auto;
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+    }
+    .portal-sidebar-brand .title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      line-height: 1.25;
+    }
+    .portal-sidebar-brand .tag {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.55);
+      margin-top: 0.15rem;
+    }
+    .portal-sidebar-nav { flex: 1; overflow-y: auto; padding: 0.85rem 0.75rem; }
+    .portal-sidebar-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255, 255, 255, 0.45);
+      padding: 0 0.65rem;
+      margin-bottom: 0.5rem;
+    }
+    .portal-nav { list-style: none; display: flex; flex-direction: column; gap: 0.15rem; }
+    .portal-nav a {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.82);
+      text-decoration: none;
+      transition: background 0.15s var(--ease), color 0.15s var(--ease);
+    }
+    .portal-nav a:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+    .portal-nav a.is-active {
+      background: linear-gradient(135deg, var(--teal) 0%, #9333ea 100%);
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(192, 38, 211, 0.35);
+    }
+    .portal-nav a.is-active:hover { color: #fff; }
+    .portal-nav a.accent-cta {
       background: linear-gradient(135deg, var(--teal) 0%, #a855f7 100%);
       color: #fff;
-      box-shadow: 0 2px 14px rgba(192, 38, 211, 0.35);
+      box-shadow: 0 2px 12px rgba(192, 38, 211, 0.3);
+      margin-top: 0.35rem;
     }
-    .nav-links .accent a:hover {
+    .portal-nav a.accent-cta:hover {
       background: linear-gradient(135deg, var(--teal-hover) 0%, #9333ea 100%);
       color: #fff;
     }
-    .nav-user { display: inline-flex; gap: 0.5rem; align-items: center; }
-    .nav-user-name { font-size: 0.8125rem; color: var(--text-muted); }
-    .logout-form { margin: 0; }
-    .logout-btn {
-      background: transparent; border: 1px solid var(--border);
-      color: var(--navy); padding: 0.4rem 0.8rem;
-      border-radius: 999px; font-weight: 600;
-      cursor: pointer; font-size: 0.8125rem; font-family: inherit;
+    .nav-icon { width: 1.15rem; height: 1.15rem; flex-shrink: 0; opacity: 0.9; }
+    .portal-sidebar-foot {
+      padding: 0.85rem 0.75rem 1.1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .logout-btn:hover { background: var(--gold-light); color: var(--navy); }
+    .portal-sidebar-user {
+      font-size: 0.8125rem;
+      color: rgba(255, 255, 255, 0.65);
+      padding: 0 0.75rem 0.65rem;
+      line-height: 1.35;
+    }
+    .portal-sidebar-user strong { color: #fff; font-weight: 600; }
+    .portal-sidebar-foot a,
+    .portal-sidebar-foot button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: rgba(255, 255, 255, 0.75);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .portal-sidebar-foot a:hover,
+    .portal-sidebar-foot button:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(26, 5, 32, 0.5);
+      z-index: 90;
+      backdrop-filter: blur(2px);
+    }
+    .portal-app.sidebar-open .sidebar-backdrop { display: block; }
+    @media (min-width: 960px) { .sidebar-backdrop { display: none !important; } }
 
-    main { flex: 1; padding: clamp(1.5rem, 4vw, 3rem) 0; }
-
-    .page-header { margin-bottom: 1.75rem; }
-    .page-header h1 {
-      font-size: clamp(1.5rem, 3vw, 2rem);
+    /* Main */
+    .portal-main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 100vh;
+    }
+    .portal-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem 1rem;
+      flex-wrap: wrap;
+      min-height: var(--topbar-h);
+      padding: 0.75rem clamp(1rem, 3vw, 1.75rem);
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .portal-topbar::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold-light), var(--teal), var(--magenta-bright), var(--gold-light));
+    }
+    .menu-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: #fff;
+      cursor: pointer;
+      color: var(--navy);
+    }
+    .menu-toggle:hover { background: var(--teal-muted); border-color: var(--teal); }
+    @media (min-width: 960px) { .menu-toggle { display: none; } }
+    .portal-topbar-title { flex: 1; min-width: 0; }
+    .portal-topbar-title .eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+    .portal-topbar-title h1 {
+      font-size: 1.15rem;
       font-weight: 700;
       color: var(--navy);
       letter-spacing: -0.02em;
-      margin-bottom: 0.4rem;
+      line-height: 1.2;
+    }
+    .portal-topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .portal-user-chip {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      padding: 0.35rem 0.65rem;
+      background: var(--bg);
+      border-radius: 999px;
+      border: 1px solid var(--border);
+    }
+    .portal-user-chip strong { color: var(--navy); }
+
+    .portal-content { flex: 1; padding: clamp(1.25rem, 3vw, 2rem) clamp(1rem, 3vw, 1.75rem) 2.5rem; }
+
+    .page-header { margin-bottom: 1.75rem; }
+    .page-header h1 {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
     .page-header p { color: var(--text-muted); font-size: 1rem; max-width: 60ch; }
 
@@ -144,6 +310,7 @@
       display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
       gap: 0.5rem 1rem; margin-bottom: 1rem;
     }
+    .panel-head--stack .pill { flex-shrink: 0; }
     .panel-head h2 {
       font-size: 1.125rem;
       color: var(--navy);
@@ -297,7 +464,7 @@
     footer.portal {
       background: linear-gradient(180deg, #3b0764 0%, var(--navy) 28%, #1a0520 100%);
       color: rgba(255, 255, 255, 0.75);
-      padding: 1.6rem 0;
+      padding: 1.6rem clamp(1rem, 3vw, 1.75rem) calc(1.6rem + env(safe-area-inset-bottom, 0px));
       font-size: 0.8125rem;
       text-align: center;
       position: relative;
@@ -310,7 +477,7 @@
 
     /* Auth pages */
     .auth-wrap {
-      min-height: calc(100vh - 220px);
+      min-height: calc(100vh - 14rem);
       display: grid;
       place-items: center;
       padding: 2rem 0;
@@ -430,7 +597,7 @@
       border-radius: var(--radius);
       padding: 1rem;
       box-shadow: var(--shadow-sm);
-      position: sticky; top: 110px;
+      position: sticky; top: 1rem;
     }
     .side-nav h3 {
       font-size: 0.72rem;
@@ -453,90 +620,236 @@
     .side-nav a:hover { background: var(--teal-muted); color: var(--teal-hover); }
     .side-nav a.is-active { background: linear-gradient(135deg, var(--teal) 0%, #a855f7 100%); color: #fff; box-shadow: 0 2px 12px rgba(192, 38, 211, 0.3); }
     .side-nav a.is-active:hover { color: #fff; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Responsive tables → stacked cards on small screens */
+    @media (max-width: 720px) {
+      .table-wrap.table-cards {
+        overflow: visible;
+        border: none;
+        background: transparent;
+      }
+      .table-wrap.table-cards table.data { background: transparent; }
+      .table-wrap.table-cards table.data thead { display: none; }
+      .table-wrap.table-cards table.data tbody tr {
+        display: block;
+        margin-bottom: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: #fff;
+        box-shadow: var(--shadow-sm);
+      }
+      .table-wrap.table-cards table.data tbody tr:hover { background: #fff; }
+      .table-wrap.table-cards table.data td {
+        display: grid;
+        grid-template-columns: minmax(0, 38%) 1fr;
+        gap: 0.25rem 0.75rem;
+        padding: 0.6rem 0.85rem;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+      }
+      .table-wrap.table-cards table.data td:last-child { border-bottom: none; }
+      .table-wrap.table-cards table.data td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+      }
+      .table-wrap.table-cards table.data td.actions-cell {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        align-items: center;
+      }
+      .table-wrap.table-cards table.data td.actions-cell::before { display: none; }
+    }
+
+    @media (max-width: 640px) {
+      .container { width: min(96%, 1180px); }
+      .panel-head {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .panel-head .btn { width: 100%; justify-content: center; }
+      .panel-head h2 { font-size: 1.05rem; }
+      .form-actions { flex-direction: column; }
+      .form-actions .btn,
+      .form-actions form .btn { width: 100%; }
+      .form-actions form { width: 100%; margin: 0; }
+      .input, .select, .textarea { font-size: 16px; }
+      .btn { min-height: 44px; }
+      .auth-card { padding: 1.5rem 1.25rem; }
+      .place-hero .cta-row .btn { flex: 1 1 100%; justify-content: center; }
+      .feedback-stars label { font-size: 2rem; padding: 0.15rem; }
+      .portal-topbar-actions { width: 100%; }
+      .portal-topbar-actions .btn { flex: 1; justify-content: center; }
+      .portal-user-chip { width: 100%; text-align: center; }
+    }
+
+    @media (max-width: 480px) {
+      .stat-card .value { font-size: 1.5rem; }
+    }
   </style>
   @stack('head')
 </head>
-<body>
+<body class="portal-body">
   @php
     $authUser = auth()->user();
     $isAdmin = $authUser?->is_admin;
+    $pageTitle = trim($__env->yieldContent('title')) ?: config('app.name');
   @endphp
 
-  <div class="top-bar">
-    <div class="container">
-      <span><strong>Atup-atup Falls</strong> · Hiking permit booking · Barangay Culandanum, Aborlan</span>
-      <span>Entry point: Sitio Manaile, Brgy. Dumanguena, Narra, Palawan</span>
+  <div class="portal-app" id="portalApp">
+    <div class="sidebar-backdrop" id="portalSidebarBackdrop" aria-hidden="true"></div>
+
+    <aside class="portal-sidebar" id="portalSidebar" aria-label="Site navigation">
+      <div class="portal-sidebar-brand">
+        <a href="{{ url('/') }}">
+          <img src="{{ asset('images/Logo.png') }}" alt="Seal of the Municipality of Aborlan" decoding="async" />
+          <span>
+            <span class="title">{{ config('app.name') }}</span>
+            <span class="tag">Atup-atup Falls Permit System</span>
+          </span>
+        </a>
+      </div>
+
+      <nav class="portal-sidebar-nav">
+        <div class="portal-sidebar-label">Menu</div>
+        <ul class="portal-nav">
+          <li>
+            <a href="{{ url('/') }}" class="{{ request()->is('/') ? 'is-active' : '' }}">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              Home
+            </a>
+          </li>
+          <li>
+            <a href="{{ route('atup.overview') }}" class="{{ request()->routeIs('atup.*') ? 'is-active' : '' }}">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              Atup-atup Falls
+            </a>
+          </li>
+          @auth
+            @if ($isAdmin)
+              <li>
+                <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.*') ? 'is-active' : '' }}">
+                  <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  Admin
+                </a>
+              </li>
+            @else
+              <li>
+                <a href="{{ route('bookings.index') }}" class="{{ request()->routeIs('bookings.*') ? 'is-active' : '' }}">
+                  <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  My bookings
+                </a>
+              </li>
+            @endif
+          @else
+            <li>
+              <a href="{{ route('login') }}" class="{{ request()->routeIs('login') ? 'is-active' : '' }}">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+                Sign in
+              </a>
+            </li>
+            <li>
+              <a href="{{ route('register') }}" class="accent-cta {{ request()->routeIs('register') ? 'is-active' : '' }}">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                Create account
+              </a>
+            </li>
+          @endauth
+        </ul>
+      </nav>
+
+      <div class="portal-sidebar-foot">
+        @auth
+          <div class="portal-sidebar-user">Signed in as <strong>{{ $authUser->name }}</strong></div>
+          <form method="POST" action="{{ route('logout') }}" style="margin:0;">
+            @csrf
+            <button type="submit">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+              Sign out
+            </button>
+          </form>
+        @endauth
+      </div>
+    </aside>
+
+    <div class="portal-main">
+      <header class="portal-topbar">
+        <button type="button" class="menu-toggle" id="portalMenuToggle" aria-label="Open menu" aria-expanded="false" aria-controls="portalSidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <div class="portal-topbar-title">
+          <div class="eyebrow">Booking portal</div>
+          <h1>{{ $pageTitle }}</h1>
+        </div>
+        <div class="portal-topbar-actions">
+          @auth
+            <span class="portal-user-chip">Hi, <strong>{{ $authUser->name }}</strong></span>
+          @else
+            <a href="{{ route('login') }}" class="btn btn-secondary btn-sm">Sign in</a>
+            <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Create account</a>
+          @endauth
+        </div>
+      </header>
+
+      <main class="portal-content">
+        @if (session('status'))
+          <div class="alert alert-success">{{ session('status') }}</div>
+        @endif
+
+        @if ($errors->any() && ! isset($suppressGlobalErrors))
+          <div class="alert alert-error">
+            <strong>Please fix the following:</strong>
+            <ul style="margin: 0.4rem 0 0 1.1rem;">
+              @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+              @endforeach
+            </ul>
+          </div>
+        @endif
+
+        @yield('content')
+      </main>
+
+      <footer class="portal">
+        &copy; {{ date('Y') }} Municipality of Aborlan · Atup-atup Falls Permit Booking System
+      </footer>
     </div>
   </div>
 
-  <header class="site-header">
-    <div class="container nav">
-      <a class="brand" href="{{ url('/') }}">
-        <img class="brand-logo"
-             src="{{ asset('images/Logo.png') }}"
-             alt="Seal of the Municipality of Aborlan"
-             decoding="async" />
-        <span class="brand-text">
-          <span class="name">{{ config('app.name') }}</span>
-          <span class="tag">Atup-atup Falls Permit System</span>
-        </span>
-      </a>
-
-      <ul class="nav-links">
-        <li><a href="{{ url('/') }}" class="{{ request()->is('/') ? 'is-active' : '' }}">Home</a></li>
-        <li><a href="{{ route('atup.overview') }}" class="{{ request()->routeIs('atup.*') ? 'is-active' : '' }}">Atup-atup Falls</a></li>
-        @auth
-          @if ($isAdmin)
-            <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.*') ? 'is-active' : '' }}">Admin</a></li>
-          @else
-            <li><a href="{{ route('bookings.index') }}" class="{{ request()->routeIs('bookings.*') ? 'is-active' : '' }}">My bookings</a></li>
-          @endif
-          <li class="nav-user">
-            <span class="nav-user-name">Hi, {{ $authUser->name }}</span>
-            <form method="POST" action="{{ route('logout') }}" class="logout-form">
-              @csrf
-              <button type="submit" class="logout-btn">Sign out</button>
-            </form>
-          </li>
-        @else
-          <li><a href="{{ route('login') }}" class="{{ request()->routeIs('login') ? 'is-active' : '' }}">Sign in</a></li>
-          <li class="accent"><a href="{{ route('register') }}">Create account</a></li>
-        @endauth
-      </ul>
-    </div>
-  </header>
-
-  @if (session('status'))
-    <div class="container" style="padding-top: 1rem;">
-      <div class="alert alert-success">{{ session('status') }}</div>
-    </div>
-  @endif
-
-  @if ($errors->any() && ! isset($suppressGlobalErrors))
-    <div class="container" style="padding-top: 1rem;">
-      <div class="alert alert-error">
-        <strong>Please fix the following:</strong>
-        <ul style="margin: 0.4rem 0 0 1.1rem;">
-          @foreach ($errors->all() as $error)
-            <li>{{ $error }}</li>
-          @endforeach
-        </ul>
-      </div>
-    </div>
-  @endif
-
-  <main>
-    <div class="container">
-      @yield('content')
-    </div>
-  </main>
-
-  <footer class="portal">
-    <div class="container">
-      &copy; {{ date('Y') }} Municipality of Aborlan · Atup-atup Falls Permit Booking System
-    </div>
-  </footer>
-
+  <script>
+    (function () {
+      var app = document.getElementById('portalApp');
+      var toggle = document.getElementById('portalMenuToggle');
+      var backdrop = document.getElementById('portalSidebarBackdrop');
+      function setOpen(open) {
+        app.classList.toggle('sidebar-open', open);
+        if (toggle) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      if (toggle) toggle.addEventListener('click', function () { setOpen(!app.classList.contains('sidebar-open')); });
+      if (backdrop) backdrop.addEventListener('click', function () { setOpen(false); });
+      document.querySelectorAll('.portal-nav a, .portal-sidebar-foot a, .portal-sidebar-foot button').forEach(function (link) {
+        link.addEventListener('click', function () {
+          if (window.matchMedia('(max-width: 959px)').matches) setOpen(false);
+        });
+      });
+    })();
+  </script>
   @stack('scripts')
 </body>
 </html>

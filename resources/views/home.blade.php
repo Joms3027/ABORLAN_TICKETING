@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ config('app.name') }} · Municipality of Aborlan</title>
+  <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
@@ -40,7 +41,44 @@
     }
 
     html {
-      scroll-behavior: auto;
+      scroll-behavior: smooth;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      .card:hover .card-visual img,
+      .carousel-track,
+      header,
+      .brand-logo,
+      .back-to-top,
+      .fab-book {
+        transition: none !important;
+      }
+    }
+
+    .skip-link {
+      position: absolute;
+      left: 1rem;
+      top: -100%;
+      z-index: 100;
+      padding: 0.65rem 1rem;
+      background: var(--gold-light);
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 0.875rem;
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow);
+      transition: top 0.2s var(--ease);
+    }
+
+    .skip-link:focus {
+      top: 1rem;
+      outline: 2px solid var(--teal);
+      outline-offset: 2px;
     }
 
     /* Anchor targets clear sticky top bar + header */
@@ -166,9 +204,28 @@
       position: sticky;
       top: 0;
       z-index: 50;
-      background: #fff;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border-bottom: none;
       box-shadow: 0 4px 20px rgba(88, 28, 135, 0.06);
+      transition: box-shadow 0.25s var(--ease);
+    }
+
+    header.is-scrolled {
+      box-shadow: 0 6px 28px rgba(42, 10, 50, 0.1);
+    }
+
+    header.is-scrolled .nav {
+      padding: 0.5rem 0;
+    }
+
+    header.is-scrolled .brand-logo {
+      height: 56px;
+    }
+
+    header.is-scrolled .brand-text .name {
+      font-size: 1rem;
     }
 
     header::after {
@@ -276,13 +333,14 @@
     }
 
     .brand-logo {
-      height: 96px;
+      height: 72px;
       width: auto;
-      max-width: min(340px, 58vw);
+      max-width: min(280px, 52vw);
       object-fit: contain;
       object-position: left center;
       flex-shrink: 0;
       display: block;
+      transition: height 0.25s var(--ease);
     }
 
     .brand-text {
@@ -794,6 +852,116 @@
       padding: 0;
       overflow: hidden;
       transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+      position: relative;
+    }
+
+    .card.is-available {
+      border-color: rgba(22, 163, 74, 0.25);
+    }
+
+    .card.is-soon {
+      opacity: 0.92;
+    }
+
+    .card-badge {
+      position: absolute;
+      top: 0.75rem;
+      left: 0.75rem;
+      z-index: 2;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.3rem 0.6rem;
+      border-radius: 999px;
+    }
+
+    .card-badge.available {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid rgba(22, 163, 74, 0.3);
+    }
+
+    .card-badge.soon {
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .card-link-stretch {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border-radius: inherit;
+    }
+
+    .card-link-stretch:focus-visible {
+      outline: 2px solid var(--teal);
+      outline-offset: -4px;
+    }
+
+    .card-body {
+      position: relative;
+      z-index: 0;
+    }
+
+    .card-body .card-link {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Featured service banner */
+    .featured-service {
+      display: grid;
+      gap: 1.5rem;
+      align-items: center;
+      margin-bottom: 1.75rem;
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(42, 10, 50, 0.96) 0%, rgba(112, 26, 117, 0.88) 55%, rgba(30, 27, 75, 0.94) 100%);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: var(--shadow-lg);
+    }
+
+    @media (min-width: 768px) {
+      .featured-service {
+        grid-template-columns: 1fr auto;
+        padding: 1.75rem 2rem;
+      }
+    }
+
+    .featured-service-content h3 {
+      font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .featured-service-content p {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 0.9375rem;
+      max-width: 52ch;
+      line-height: 1.6;
+    }
+
+    .featured-service-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+    }
+
+    .featured-service-actions .btn-light {
+      background: var(--gold-light);
+      color: var(--navy);
+    }
+
+    .featured-service-actions .btn-light:hover {
+      background: #fff48f;
+    }
+
+    .featured-service-actions .btn-ghost {
+      border-color: rgba(255, 255, 255, 0.4);
     }
 
     .card:hover {
@@ -869,6 +1037,24 @@
       text-decoration: underline;
     }
 
+    .card-body .card-link:not([href]) {
+      color: var(--text-muted);
+      font-weight: 600;
+      cursor: default;
+    }
+
+    .card-body .card-link:not([href]):hover {
+      text-decoration: none;
+    }
+
+    .guide-item[id] {
+      scroll-margin-top: 8.5rem;
+    }
+
+    .guide-sidebar {
+      display: none;
+    }
+
     /* Steps */
     .steps {
       display: grid;
@@ -879,6 +1065,18 @@
       .steps {
         grid-template-columns: repeat(3, 1fr);
         gap: 1.5rem;
+        position: relative;
+      }
+
+      .steps::before {
+        content: "";
+        position: absolute;
+        top: 2.85rem;
+        left: 18%;
+        right: 18%;
+        height: 2px;
+        background: linear-gradient(90deg, var(--border), var(--teal-muted), var(--border));
+        z-index: 0;
       }
     }
 
@@ -888,6 +1086,7 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 1.75rem 1.5rem;
+      z-index: 1;
     }
 
     .step-num {
@@ -1308,6 +1507,176 @@
       color: var(--text);
     }
 
+    @media (min-width: 900px) {
+      .guide-layout {
+        display: grid;
+        grid-template-columns: 1fr 280px;
+        gap: 2.5rem;
+        align-items: start;
+      }
+
+      .guide-sidebar {
+        display: block;
+        position: sticky;
+        top: 8.5rem;
+        padding: 1.25rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .guide-sidebar h3 {
+        font-size: 0.8125rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--teal);
+        margin-bottom: 0.75rem;
+      }
+
+      .guide-sidebar ul {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .guide-sidebar a {
+        display: block;
+        padding: 0.5rem 0.65rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--navy);
+        text-decoration: none;
+        transition: background 0.15s var(--ease);
+      }
+
+      .guide-sidebar a:hover {
+        background: var(--teal-muted);
+      }
+    }
+
+    /* Contact details */
+    .contact-grid {
+      display: grid;
+      gap: 1rem;
+      max-width: 720px;
+      margin: 0 auto 1.5rem;
+      text-align: left;
+    }
+
+    @media (min-width: 560px) {
+      .contact-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .contact-item {
+      padding: 1rem 1.15rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: var(--radius-sm);
+    }
+
+    .contact-item dt {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 0.35rem;
+    }
+
+    .contact-item dd {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.45;
+    }
+
+    .contact-item a {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .contact-item a:hover {
+      text-decoration: underline;
+    }
+
+    /* Back to top & mobile FAB */
+    .back-to-top,
+    .fab-book {
+      position: fixed;
+      z-index: 45;
+      display: grid;
+      place-items: center;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: opacity 0.25s var(--ease), transform 0.25s var(--ease), visibility 0.25s;
+    }
+
+    .back-to-top {
+      right: 1.25rem;
+      bottom: 1.25rem;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: #fff;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(12px);
+    }
+
+    .back-to-top.is-visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .back-to-top:hover {
+      background: var(--navy-soft);
+    }
+
+    .back-to-top:focus-visible {
+      outline: 2px solid var(--gold-light);
+      outline-offset: 2px;
+    }
+
+    .fab-book {
+      right: 1.25rem;
+      bottom: 1.25rem;
+      padding: 0.75rem 1.15rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--teal) 0%, #a855f7 100%);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.875rem;
+      text-decoration: none;
+      box-shadow: 0 4px 20px rgba(192, 38, 211, 0.4);
+    }
+
+    .fab-book:hover {
+      transform: translateY(-2px);
+      color: #fff;
+    }
+
+    @media (min-width: 901px) {
+      .fab-book {
+        display: none;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .back-to-top {
+        bottom: 4.5rem;
+      }
+    }
+
     /* Download / forms grid */
     .doc-grid {
       display: grid;
@@ -1571,6 +1940,7 @@
       ],
     ];
   @endphp
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <div class="top-bar">
     <div class="container">
       <div class="top-bar-meta">
@@ -1592,7 +1962,7 @@
     </div>
   </div>
 
-  <header>
+  <header id="site-header">
     <div class="container nav">
       <a class="brand" href="{{ url('/') }}">
         <img
@@ -1628,7 +1998,6 @@
             <li>
               <a href="{{ url('/') }}" aria-current="page">Home</a>
             </li>
-            <li><a href="{{ route('atup.overview') }}">Atup-atup Falls</a></li>
             <li><a href="#gallery">Gallery</a></li>
             <li><a href="#services">Services</a></li>
             <li><a href="#visitor-guide">Visitor guide</a></li>
@@ -1641,6 +2010,7 @@
     </div>
   </header>
 
+  <main id="main-content">
   <section class="hero">
     <div
       class="hero-bg"
@@ -1650,45 +2020,45 @@
     <div class="container">
       <div class="hero-grid">
         <div>
-          <p class="eyebrow">Public service</p>
-          <h1>Secure online booking for municipal services</h1>
+          <p class="eyebrow">Municipality of Aborlan · Palawan</p>
+          <h1>Plan your visit to Atup-atup Falls and municipal services</h1>
           <p class="hero-lead">
-            Schedule appointments, reserve public facilities, and access tourism-related services through a single,
-            privacy-conscious portal—aligned with streamlined delivery of local government services.
+            Book hiking permits online, review official visitor requirements, and access LGU forms—all in one
+            place. Start with the visitor guide, then reserve your slot when you are ready.
           </p>
           <div class="hero-actions">
             <a href="{{ route('atup.overview') }}" class="btn btn-light">Book Atup-atup Falls hike</a>
-            <a href="#gallery" class="btn btn-ghost">View destination gallery</a>
+            <a href="#visitor-guide" class="btn btn-ghost">Read visitor guide</a>
           </div>
           <dl class="hero-meta">
             <div>
-              <dt>Availability</dt>
-              <dd>Online requests · 24 hours</dd>
+              <dt>Online booking</dt>
+              <dd>Available 24 hours</dd>
             </div>
             <div>
-              <dt>Processing</dt>
-              <dd>Confirmation during office hours</dd>
+              <dt>Confirmation</dt>
+              <dd>During office hours (Mon–Fri)</dd>
             </div>
             <div>
-              <dt>Data handling</dt>
-              <dd>Handled per municipal policy</dd>
+              <dt>Primary destination</dt>
+              <dd>Atup-atup Falls · Nag Atup</dd>
             </div>
           </dl>
         </div>
         <aside class="hero-card" aria-labelledby="hero-aside-title">
-          <h2 id="hero-aside-title">At a glance</h2>
+          <h2 id="hero-aside-title">Before you book</h2>
           <ul>
             <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <span>Complete the health declaration and waiver forms listed in the visitor guide.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span>Choose your visit date from published daily quotas on the booking page.</span>
+            </li>
+            <li>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              <span>Centralized scheduling for frontline offices and bookable venues.</span>
-            </li>
-            <li>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              <span>Designed with appropriate safeguards for resident and visitor information.</span>
-            </li>
-            <li>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-              <span>Clear steps from service selection to booking confirmation.</span>
+              <span>Bring valid ID and signed permits on the day of your hike.</span>
             </li>
           </ul>
         </aside>
@@ -1751,10 +2121,25 @@
       <div class="section-head center">
         <p class="section-kicker">Service catalogue</p>
         <h2>Bookings we currently support</h2>
-        <p>Select a category to view availability and requirements. Additional services may be added as programs expand.</p>
+        <p>Atup-atup Falls hiking permits are available now. Additional municipal services will be added to this portal as programs expand.</p>
+      </div>
+      <div class="featured-service">
+        <div class="featured-service-content">
+          <h3>Atup-atup Falls · Nag Atup hiking permits</h3>
+          <p>Our most popular destination. View daily availability, complete required declarations online, and receive confirmation from the municipal tourism desk.</p>
+        </div>
+        <div class="featured-service-actions">
+          <a href="{{ route('atup.overview') }}" class="btn btn-light">View availability</a>
+          @auth
+            <a href="{{ auth()->user()->is_admin ? route('admin.dashboard') : route('bookings.create') }}" class="btn btn-ghost">{{ auth()->user()->is_admin ? 'Admin dashboard' : 'Start booking' }}</a>
+          @else
+            <a href="{{ route('register') }}" class="btn btn-ghost">Register to book</a>
+          @endauth
+        </div>
       </div>
       <div class="cards">
-        <article class="card">
+        <article class="card is-soon">
+          <span class="card-badge soon">Coming soon</span>
           <div class="card-visual">
             <img
               src="{{ asset('images/IMG_20260319_095538_611.jpg') }}"
@@ -1771,10 +2156,11 @@
             </div>
             <h3>Office appointments</h3>
             <p>Plan visits to municipal offices for permits, certifications, and other frontline transactions.</p>
-            <a class="card-link" href="#">Check availability →</a>
+            <span class="card-link" aria-hidden="true">Not yet available online</span>
           </div>
         </article>
-        <article class="card">
+        <article class="card is-soon">
+          <span class="card-badge soon">Coming soon</span>
           <div class="card-visual">
             <img
               src="{{ asset('images/IMG_20260319_110328_673.jpg') }}"
@@ -1791,10 +2177,12 @@
             </div>
             <h3>Facility reservations</h3>
             <p>Request use of community halls, multi-purpose venues, and other municipally managed spaces.</p>
-            <a class="card-link" href="#">View facilities →</a>
+            <span class="card-link" aria-hidden="true">Not yet available online</span>
           </div>
         </article>
-        <article class="card">
+        <article class="card is-available">
+          <span class="card-badge available">Available now</span>
+          <a class="card-link-stretch" href="{{ route('atup.overview') }}" aria-label="Explore Atup-atup Falls hiking permits"></a>
           <div class="card-visual">
             <img
               src="{{ asset('images/IMG_20260319_102401_340.jpg') }}"
@@ -1810,8 +2198,8 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z"/></svg>
             </div>
             <h3>Tourism &amp; local programs</h3>
-            <p>Coordinate guided activities, information sessions, and tourism-related bookings supported by the LGU.</p>
-            <a class="card-link" href="#">Explore programs →</a>
+            <p>Book guided hikes to Atup-atup Falls and coordinate tourism-related activities supported by the LGU.</p>
+            <a class="card-link" href="{{ route('atup.overview') }}">Explore Atup-atup Falls →</a>
           </div>
         </article>
       </div>
@@ -1825,32 +2213,44 @@
         <h2>Visitor guide — before you go</h2>
         <p>Follow this order so your paperwork matches the official forms published by the LGU. View each PDF below on screen; print or complete as instructed, and bring signed copies when required.</p>
       </div>
-      <ol class="guide-list">
-        <li class="guide-item">
-          <h3>Review Nag Atup information</h3>
-          <p>Understand site orientation, local rules, fees (if any), and what the LGU expects from guests.</p>
-          <p class="guide-doc">Document: <strong>NAG ATUP INFORMATION.pdf</strong> — <a href="{{ route('docs.view', ['f' => 'NAG ATUP INFORMATION.pdf']) }}">View in page</a></p>
-        </li>
-        <li class="guide-item">
-          <h3>Complete your health declaration</h3>
-          <p>Declare health status truthfully. Keep a copy for your records and submit as instructed by the municipal or tourism desk.</p>
-          <p class="guide-doc">Document: <strong>HEALTH DECLARATION FORM.pdf</strong> — <a href="{{ route('docs.view', ['f' => 'HEALTH DECLARATION FORM.pdf']) }}">View in page</a></p>
-        </li>
-        <li class="guide-item">
-          <h3>Sign the acknowledgement &amp; waiver of risk</h3>
-          <p>Participants in outdoor or adventure activities must acknowledge hazards and sign where the form requires.</p>
-          <p class="guide-doc">Document: <strong>ACKNOWLEDGEMENT AND WAIVER OF RISK.pdf</strong> — <a href="{{ route('docs.view', ['f' => 'ACKNOWLEDGEMENT AND WAIVER OF RISK.pdf']) }}">View in page</a></p>
-        </li>
-        <li class="guide-item">
-          <h3>Secure your visitors entry permit</h3>
-          <p>File the <strong>Nag-Atup Visitors Entry Permit</strong> and wait for confirmation or endorsement before your visit date, unless the LGU directs otherwise.</p>
-          <p class="guide-doc">Document: <strong>NAG-ATUP Visitors Entry Permit.pdf</strong> — <a href="{{ route('docs.view', ['f' => 'NAG-ATUP Visitors Entry Permit.pdf']) }}">View in page</a></p>
-        </li>
-        <li class="guide-item">
-          <h3>Arrive prepared</h3>
-          <p>Bring valid ID, printed permits, and any equipment or companions noted in your application. Follow briefing instructions from guides or marshals.</p>
-        </li>
-      </ol>
+      <div class="guide-layout">
+        <ol class="guide-list">
+          <li class="guide-item" id="guide-step-1">
+            <h3>Review Nag Atup information</h3>
+            <p>Understand site orientation, local rules, fees (if any), and what the LGU expects from guests.</p>
+            <p class="guide-doc">Document: <strong>NAG ATUP INFORMATION.pdf</strong> — <a href="{{ route('docs.view', ['f' => 'NAG ATUP INFORMATION.pdf']) }}">View in page</a></p>
+          </li>
+          <li class="guide-item" id="guide-step-2">
+            <h3>Complete your health declaration</h3>
+            <p>Declare health status truthfully. Keep a copy for your records and submit as instructed by the municipal or tourism desk.</p>
+            <p class="guide-doc">Document: <strong>HEALTH DECLARATION FORM.pdf</strong> — <a href="{{ route('docs.view', ['f' => 'HEALTH DECLARATION FORM.pdf']) }}">View in page</a></p>
+          </li>
+          <li class="guide-item" id="guide-step-3">
+            <h3>Sign the acknowledgement &amp; waiver of risk</h3>
+            <p>Participants in outdoor or adventure activities must acknowledge hazards and sign where the form requires.</p>
+            <p class="guide-doc">Document: <strong>ACKNOWLEDGEMENT AND WAIVER OF RISK.pdf</strong> — <a href="{{ route('docs.view', ['f' => 'ACKNOWLEDGEMENT AND WAIVER OF RISK.pdf']) }}">View in page</a></p>
+          </li>
+          <li class="guide-item" id="guide-step-4">
+            <h3>Secure your visitors entry permit</h3>
+            <p>File the <strong>Nag-Atup Visitors Entry Permit</strong> and wait for confirmation or endorsement before your visit date, unless the LGU directs otherwise.</p>
+            <p class="guide-doc">Document: <strong>NAG-ATUP Visitors Entry Permit.pdf</strong> — <a href="{{ route('docs.view', ['f' => 'NAG-ATUP Visitors Entry Permit.pdf']) }}">View in page</a></p>
+          </li>
+          <li class="guide-item" id="guide-step-5">
+            <h3>Arrive prepared</h3>
+            <p>Bring valid ID, printed permits, and any equipment or companions noted in your application. Follow briefing instructions from guides or marshals.</p>
+          </li>
+        </ol>
+        <aside class="guide-sidebar" aria-label="Guide shortcuts">
+          <h3>Jump to step</h3>
+          <ul>
+            <li><a href="#guide-step-1">1 · Nag Atup information</a></li>
+            <li><a href="#guide-step-2">2 · Health declaration</a></li>
+            <li><a href="#guide-step-3">3 · Waiver of risk</a></li>
+            <li><a href="#guide-step-4">4 · Entry permit</a></li>
+            <li><a href="#guide-step-5">5 · Arrive prepared</a></li>
+          </ul>
+        </aside>
+      </div>
       <p class="guide-note">
         <strong>Legal wording.</strong> Binding terms, declarations, and signatures are defined in the official PDFs (view in page or open in a PDF reader). Authoritative editable copies may be maintained as Word files offline by the LGU. Replace this summary with verbatim LGU text whenever your legal office finalizes copy for the web.
       </p>
@@ -1910,18 +2310,42 @@
   <section class="cta-wrap" id="contact">
     <div class="container">
       <div class="cta" style="--cta-image: url('{{ asset('images/IMG_20260319_120504_337.jpg') }}');">
-        <h2>Assistance with reservations</h2>
+        <h2>Need help with your booking?</h2>
         <p>
-          For account access, changes to an existing booking, or technical issues with this portal, please reach out to
-          the municipal information desk during regular office hours.
+          For account access, permit changes, or technical issues with this portal, contact the municipal
+          information desk during regular office hours.
         </p>
+        <dl class="contact-grid">
+          <div class="contact-item">
+            <dt>Office hours</dt>
+            <dd>Monday – Friday, 8:00 AM – 5:00 PM</dd>
+          </div>
+          <div class="contact-item">
+            <dt>Front desk</dt>
+            <dd>Municipal Information Office<br />Municipality of Aborlan, Palawan</dd>
+          </div>
+          <div class="contact-item">
+            <dt>Phone</dt>
+            <dd><a href="tel:+630000000000">(XXX) XXX-XXXX</a></dd>
+          </div>
+          <div class="contact-item">
+            <dt>Email</dt>
+            <dd><a href="mailto:info@aborlan.gov.ph">info@aborlan.gov.ph</a></dd>
+          </div>
+        </dl>
         <div class="cta-actions">
-          <a href="#" class="btn btn-light">Contact the LGU</a>
-          <a href="#" class="btn btn-ghost">Download citizen charter (PDF)</a>
+          <a href="{{ route('atup.overview') }}" class="btn btn-light">Book Atup-atup hike</a>
+          <a href="#forms" class="btn btn-ghost">View official forms</a>
         </div>
       </div>
     </div>
   </section>
+  </main>
+
+  <a href="{{ route('atup.overview') }}" class="fab-book">Book a hike</a>
+  <button type="button" class="back-to-top" id="back-to-top" aria-label="Back to top">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M18 15l-6-6-6 6"/></svg>
+  </button>
 
   <footer>
     <div class="container">
@@ -1956,9 +2380,9 @@
         <div class="footer-col">
           <h3>Transparency</h3>
           <ul>
-            <li><a href="#">Privacy notice</a></li>
-            <li><a href="#">Terms of use</a></li>
-            <li><a href="#">Freedom of Information</a></li>
+            <li><a href="#contact">Contact &amp; support</a></li>
+            <li><a href="#forms">Official forms</a></li>
+            <li><a href="{{ route('atup.overview') }}">Atup-atup Falls</a></li>
           </ul>
         </div>
       </div>
@@ -1969,6 +2393,29 @@
     </div>
   </footer>
   <script>
+    (function () {
+      var header = document.getElementById("site-header");
+      var backToTop = document.getElementById("back-to-top");
+
+      function onScrollUi() {
+        if (header) {
+          header.classList.toggle("is-scrolled", window.scrollY > 24);
+        }
+        if (backToTop) {
+          backToTop.classList.toggle("is-visible", window.scrollY > 480);
+        }
+      }
+
+      window.addEventListener("scroll", onScrollUi, { passive: true });
+      onScrollUi();
+
+      if (backToTop) {
+        backToTop.addEventListener("click", function () {
+          window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+        });
+      }
+    })();
+
     (function () {
       var btn = document.getElementById("nav-toggle");
       var cluster = document.getElementById("nav-cluster");

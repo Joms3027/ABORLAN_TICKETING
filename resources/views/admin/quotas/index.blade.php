@@ -81,7 +81,7 @@
       <h2>Next 30 days</h2>
       <span class="muted">Left border = custom override</span>
     </div>
-    <div class="table-wrap">
+    <div class="table-wrap table-cards">
       <table class="data">
         <thead>
           <tr>
@@ -97,10 +97,10 @@
         <tbody>
           @foreach ($availability as $row)
             <tr @if($row['custom']) style="border-left: 3px solid var(--admin-accent);" @endif>
-              <td><strong>{{ $row['label'] }}</strong></td>
-              <td>{{ $row['quota'] }}</td>
-              <td>{{ $row['booked'] }}</td>
-              <td>
+              <td data-label="Date"><strong>{{ $row['label'] }}</strong></td>
+              <td data-label="Cap">{{ $row['quota'] }}</td>
+              <td data-label="Booked">{{ $row['booked'] }}</td>
+              <td data-label="Open">
                 @if (! $row['accepts_new_bookings'] && $row['remaining'] < 1)
                   <span style="color: var(--danger); font-weight: 600;">Full</span>
                 @elseif (! $row['accepts_new_bookings'])
@@ -109,15 +109,15 @@
                   {{ $row['remaining'] }}
                 @endif
               </td>
-              <td>
+              <td data-label="Groups">
                 @if ($row['max_bookings'] === null)
                   <span class="muted">No cap</span>
                 @else
                   {{ $row['bookings_booked'] }} / {{ $row['max_bookings'] }}
                 @endif
               </td>
-              <td>{{ $row['note'] ?: '—' }}</td>
-              <td>{{ $row['custom'] ? 'Override' : 'Default' }}</td>
+              <td data-label="Note">{{ $row['note'] ?: '—' }}</td>
+              <td data-label="Source">{{ $row['custom'] ? 'Override' : 'Default' }}</td>
             </tr>
           @endforeach
         </tbody>
@@ -130,7 +130,7 @@
     @if ($customDates->isEmpty())
       <p class="empty-state">No upcoming custom overrides.</p>
     @else
-      <div class="table-wrap">
+      <div class="table-wrap table-cards">
         <table class="data">
           <thead>
             <tr>
@@ -144,17 +144,17 @@
           <tbody>
             @foreach ($customDates as $row)
               <tr>
-                <td><strong>{{ \Illuminate\Support\Carbon::parse($row->quota_date)->format('D, M j, Y') }}</strong></td>
-                <td>{{ $row->slots }}</td>
-                <td>
+                <td data-label="Date"><strong>{{ \Illuminate\Support\Carbon::parse($row->quota_date)->format('D, M j, Y') }}</strong></td>
+                <td data-label="Persons / day">{{ $row->slots }}</td>
+                <td data-label="Bookings / day">
                   @if ($row->max_bookings === null)
                     {{ $defaultMaxBookings > 0 ? $defaultMaxBookings.' (default)' : 'No cap' }}
                   @else
                     {{ $row->max_bookings }}
                   @endif
                 </td>
-                <td>{{ $row->note ?: '—' }}</td>
-                <td>
+                <td data-label="Note">{{ $row->note ?: '—' }}</td>
+                <td class="actions-cell" data-label="">
                   <form method="POST" action="{{ route('admin.quotas.destroy', $row) }}" onsubmit="return confirm('Remove this override and use defaults?');" style="margin:0;">
                     @csrf
                     @method('DELETE')

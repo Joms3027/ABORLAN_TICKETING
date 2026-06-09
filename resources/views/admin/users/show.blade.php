@@ -64,7 +64,7 @@
       @if ($user->bookings->isEmpty())
         <p class="empty-state">No bookings yet.</p>
       @else
-        <div class="table-wrap">
+        <div class="table-wrap table-cards">
           <table class="data">
             <thead>
               <tr>
@@ -82,18 +82,18 @@
                   $hasPermit = $b->visitor_address || $b->members || $b->purpose_of_visit;
                 @endphp
                 <tr>
-                  <td><strong>{{ $b->reference_code }}</strong></td>
-                  <td>{{ $b->hike_date->format('M j, Y') }}</td>
-                  <td>{{ $b->party_size }}</td>
-                  <td><span class="pill pill-{{ $b->status }}">{{ $b->statusLabel() }}</span></td>
-                  <td>
+                  <td data-label="Reference"><strong>{{ $b->reference_code }}</strong></td>
+                  <td data-label="Hike date">{{ $b->hike_date->format('M j, Y') }}</td>
+                  <td data-label="Party">{{ $b->party_size }}</td>
+                  <td data-label="Status"><span class="pill pill-{{ $b->status }}">{{ $b->statusLabel() }}</span></td>
+                  <td data-label="Permit form">
                     @if ($hasPermit)
                       <span class="pill pill-completed">On file</span>
                     @else
                       <span class="muted">—</span>
                     @endif
                   </td>
-                  <td>
+                  <td class="actions-cell" data-label="">
                     <a class="btn btn-secondary btn-sm" href="{{ route('admin.bookings.show', $b) }}">Open</a>
                     @if ($hasPermit)
                       <a class="btn btn-secondary btn-sm" href="#permit-{{ $b->id }}">Permit</a>

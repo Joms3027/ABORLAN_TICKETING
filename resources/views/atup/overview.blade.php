@@ -149,6 +149,13 @@
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
+      min-width: 0;
+      max-width: 100%;
+    }
+    .atup-sidebar .panel {
+      min-width: 0;
+      max-width: 100%;
+      overflow-x: hidden;
     }
     @media (min-width: 900px) {
       .atup-layout { grid-template-columns: 1.4fr 1fr; }
@@ -287,14 +294,35 @@
       color: var(--teal);
     }
     .atup-avail-row .row-top {
-      display: flex; flex-wrap: wrap; align-items: baseline;
-      justify-content: space-between; gap: 0.35rem 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.35rem 0.75rem;
+    }
+    .atup-avail-row .row-top > div:first-child {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem;
+      min-width: 0;
+      flex: 1 1 8rem;
+    }
+    .atup-avail-row .row-top > div:first-child strong {
+      word-break: break-word;
+      line-height: 1.3;
     }
     .atup-avail-row .row-stats {
       text-align: right;
       min-width: 0;
+      flex: 1 1 6rem;
     }
     .atup-avail-row strong { color: var(--navy); }
+    .avail-list {
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+    }
     .atup-avail-row .badge-today {
       font-size: 0.65rem; font-weight: 800;
       text-transform: uppercase; letter-spacing: 0.05em;
@@ -463,16 +491,18 @@
       grid-template-columns: repeat(7, minmax(0, 1fr));
       gap: 0.35rem;
       margin-bottom: 1rem;
-    }
-    @media (max-width: 520px) {
-      .atup-week-strip { gap: 0.25rem; }
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
     }
     .atup-day-pill {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.2rem;
-      padding: 0.5rem 0.25rem;
+      gap: 0.15rem;
+      min-width: 0;
+      max-width: 100%;
+      padding: 0.5rem 0.15rem;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border);
       background: #fff;
@@ -484,9 +514,16 @@
       text-decoration: none;
       transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease), border-color 0.15s var(--ease);
     }
-    .atup-day-pill .dow { font-size: 0.6rem; opacity: 0.85; }
+    .atup-day-pill .dow {
+      font-size: 0.6rem;
+      opacity: 0.85;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .atup-day-pill .dom {
-      font-size: 1rem;
+      font-size: clamp(0.8rem, 2.8vw, 1rem);
       font-weight: 800;
       color: var(--navy);
       line-height: 1;
@@ -504,10 +541,12 @@
       border-color: var(--teal);
       box-shadow: 0 0 0 2px rgba(192, 38, 211, 0.25);
     }
-    .atup-day-pill:hover:not(.full) {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-sm);
-      border-color: rgba(192, 38, 211, 0.4);
+    @media (hover: hover) {
+      .atup-day-pill:hover:not(.full) {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+        border-color: rgba(192, 38, 211, 0.4);
+      }
     }
     .atup-day-pill.full { opacity: 0.72; cursor: default; }
     .atup-day-pill:focus-visible {
@@ -745,6 +784,215 @@
     }
     @media (min-width: 900px) {
       .atup-back-top { bottom: 1.5rem; }
+    }
+
+    /* Mobile & tablet — /atup-atup */
+    @media (max-width: 899px) {
+      .atup-overview {
+        --atup-sticky-top: 10.75rem;
+        --atup-nav-h: 3rem;
+      }
+      .atup-overview .place-hero {
+        padding: clamp(1.35rem, 4.5vw, 2rem);
+        margin-bottom: 1.25rem;
+      }
+      .atup-overview .place-hero h1 {
+        max-width: none;
+        font-size: clamp(1.35rem, 5.2vw, 1.9rem);
+        line-height: 1.2;
+        margin-bottom: 0.65rem;
+      }
+      .atup-overview .place-hero p {
+        max-width: 100%;
+        font-size: 0.9375rem;
+        line-height: 1.55;
+      }
+      .atup-hero-lead {
+        font-size: 0.9375rem;
+        margin-bottom: 0.65rem;
+      }
+      .atup-hero-meta {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.45rem;
+        margin: 0.85rem 0 1rem;
+      }
+      .atup-pill {
+        width: 100%;
+        justify-content: flex-start;
+        font-size: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        line-height: 1.35;
+      }
+      .atup-overview .cta-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+      }
+      .atup-overview .cta-row .btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+        white-space: normal;
+        text-align: center;
+      }
+      .atup-subnav-wrap {
+        top: calc(var(--atup-sticky-top) - var(--atup-nav-h) - 0.35rem);
+        margin-left: -2%;
+        margin-right: -2%;
+        padding-left: 2%;
+        padding-right: 2%;
+      }
+      .atup-subnav a {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0.55rem 1rem;
+      }
+      .atup-status-banner {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        padding: 1rem;
+      }
+      .atup-status-banner .status-text {
+        min-width: 0;
+        font-size: 0.875rem;
+      }
+      .atup-status-banner .btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+      }
+      .atup-summary {
+        grid-template-columns: 1fr;
+      }
+      .atup-summary-card {
+        padding: 0.9rem 1rem;
+      }
+      .atup-summary-card .v {
+        font-size: 1.2rem;
+      }
+      .atup-col-main .panel-head,
+      .atup-sidebar .panel-head {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .atup-col-main .panel-head .muted,
+      .atup-sidebar .panel-head .muted {
+        font-size: 0.8125rem;
+      }
+      .atup-highlight-scroller .highlight {
+        flex: 0 0 min(88vw, 300px);
+      }
+      .atup-highlight-scroller .highlight img {
+        height: 190px;
+      }
+      .atup-slot-cta .btn {
+        min-height: 44px;
+      }
+      .atup-layout {
+        min-width: 0;
+        overflow-x: hidden;
+      }
+      .atup-week-strip {
+        gap: 0.25rem;
+      }
+      .atup-avail-row {
+        overflow: hidden;
+        word-wrap: break-word;
+      }
+      .atup-avail-row .row-stats .hint {
+        word-break: break-word;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .atup-overview {
+        --atup-sticky-top: 11.75rem;
+        padding-bottom: 5rem;
+      }
+      .atup-week-strip {
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 0.2rem;
+        overflow: hidden;
+      }
+      .atup-day-pill {
+        padding: 0.35rem 0.08rem;
+      }
+      .atup-day-pill .dow { font-size: 0.52rem; letter-spacing: 0; }
+      .atup-day-pill .dom { font-size: 0.85rem; }
+      .atup-day-pill.today {
+        box-shadow: 0 0 0 1px rgba(192, 38, 211, 0.35);
+      }
+      .atup-avail-row .row-top {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.35rem;
+      }
+      .atup-avail-row .row-top > div:first-child {
+        flex: none;
+        width: 100%;
+      }
+      .atup-avail-row .row-top > div:first-child strong {
+        font-size: 0.875rem;
+      }
+      .atup-avail-row .row-stats {
+        text-align: left;
+        width: 100%;
+        flex: none;
+      }
+      .atup-avail-legend {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
+      }
+      .atup-steps li {
+        grid-template-columns: auto 1fr;
+        gap: 0.65rem 0.75rem;
+      }
+      .atup-loc-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .atup-lightbox {
+        padding: 0.5rem;
+        align-items: flex-end;
+      }
+      .atup-lightbox-dialog {
+        max-height: 92vh;
+      }
+      .atup-lightbox img {
+        max-height: min(55vh, 480px);
+      }
+      .atup-lightbox-caption {
+        font-size: 0.875rem;
+        padding: 0 0.5rem 0.5rem;
+      }
+      .atup-back-top {
+        right: 0.75rem;
+        width: 2.75rem;
+        height: 2.75rem;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .atup-overview { --atup-sticky-top: 12.5rem; }
+      .atup-overview .place-hero h1 {
+        font-size: 1.25rem;
+      }
+      .atup-pill { font-size: 0.7rem; }
+      .atup-week-strip { gap: 0.15rem; }
+      .atup-day-pill {
+        min-width: 0;
+        padding: 0.3rem 0.05rem;
+      }
+      .atup-day-pill .dow { font-size: 0.48rem; }
+      .atup-day-pill .dom { font-size: 0.8rem; }
+      .atup-day-pill .cap {
+        width: 0.35rem;
+        height: 0.35rem;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1198,6 +1446,22 @@
 @push('scripts')
   <script>
     (function () {
+      function syncStickyOffset() {
+        var root = document.querySelector('.atup-overview');
+        var header = document.querySelector('.portal-topbar');
+        if (!root || !header) return;
+        var px = header.offsetHeight + 10;
+        root.style.setProperty('--atup-sticky-top', (px / 16) + 'rem');
+      }
+      syncStickyOffset();
+      window.addEventListener('resize', syncStickyOffset, { passive: true });
+      var menuToggle = document.getElementById('portalMenuToggle');
+      if (menuToggle) {
+        menuToggle.addEventListener('click', function () {
+          window.setTimeout(syncStickyOffset, 280);
+        });
+      }
+
       var subnav = document.getElementById('atup-subnav');
       var sections = ['slots', 'plan', 'gallery', 'locations', 'reminders'];
       var links = subnav ? subnav.querySelectorAll('a[data-section]') : [];

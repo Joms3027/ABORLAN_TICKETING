@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>@yield('title', 'Admin') · {{ config('app.name') }}</title>
+  <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
@@ -43,6 +44,7 @@
       font-size: 1rem;
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
+      overflow-x: clip;
     }
     a { color: var(--admin-accent-hover); text-decoration: none; }
     a:hover { color: var(--navy); }
@@ -438,6 +440,24 @@
     table.data tbody tr { transition: background 0.12s var(--ease); }
     table.data tbody tr:hover { background: rgba(192, 38, 211, 0.04); }
     table.data .sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.1rem; }
+    table.data td.actions-cell {
+      text-align: right;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    table.data td.actions-cell form {
+      display: inline-flex;
+      margin: 0;
+      vertical-align: middle;
+    }
+    table.data td.actions-cell form + form,
+    table.data td.actions-cell form + a,
+    table.data td.actions-cell a + form {
+      margin-left: 0.4rem;
+    }
+    table.data td.actions-cell > a {
+      vertical-align: middle;
+    }
 
     .stat-grid {
       display: grid;
@@ -639,6 +659,77 @@
     .breadcrumb a { color: var(--text-muted); }
     .breadcrumb a:hover { color: var(--admin-accent-hover); }
     .breadcrumb span[aria-hidden] { opacity: 0.5; }
+
+    /* Responsive tables → stacked cards on small screens */
+    @media (max-width: 720px) {
+      .table-wrap.table-cards {
+        overflow: visible;
+        border: none;
+        background: transparent;
+      }
+      .table-wrap.table-cards table.data { background: transparent; }
+      .table-wrap.table-cards table.data thead { display: none; }
+      .table-wrap.table-cards table.data tbody tr {
+        display: block;
+        margin-bottom: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: #fff;
+        box-shadow: var(--shadow-sm);
+      }
+      .table-wrap.table-cards table.data tbody tr:hover { background: #fff; }
+      .table-wrap.table-cards table.data td {
+        display: grid;
+        grid-template-columns: minmax(0, 38%) 1fr;
+        gap: 0.25rem 0.75rem;
+        padding: 0.6rem 0.85rem;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+      }
+      .table-wrap.table-cards table.data td:last-child { border-bottom: none; }
+      .table-wrap.table-cards table.data td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+      }
+      .table-wrap.table-cards table.data td.actions-cell {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        align-items: center;
+      }
+      .table-wrap.table-cards table.data td.actions-cell::before { display: none; }
+    }
+
+    @media (max-width: 640px) {
+      .filter-bar { flex-direction: column; align-items: stretch; }
+      .filter-bar .input,
+      .filter-bar .select { width: 100%; min-width: 0; }
+      .filter-bar .btn { width: 100%; justify-content: center; min-height: 44px; }
+      .status-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 0.35rem;
+        margin-bottom: 1rem;
+      }
+      .status-tabs a { flex-shrink: 0; }
+      .panel-head { flex-direction: column; align-items: stretch; }
+      .panel-head .btn { width: 100%; justify-content: center; }
+      .form-actions { flex-direction: column; }
+      .form-actions .btn,
+      .form-actions form { width: 100%; }
+      .form-actions form { margin: 0; }
+      .input, .select, .textarea { font-size: 16px; }
+      .btn { min-height: 44px; }
+      .admin-topbar-actions { width: 100%; }
+      .admin-topbar-actions .btn { flex: 1; justify-content: center; }
+      .admin-user-chip { width: 100%; text-align: center; }
+      .quick-actions .btn { flex: 1 1 100%; justify-content: center; }
+    }
   </style>
   @stack('head')
 </head>

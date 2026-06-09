@@ -24,7 +24,7 @@
     @if ($users->isEmpty())
       <p class="empty-state">No users match the current search.</p>
     @else
-      <div class="table-wrap">
+      <div class="table-wrap table-cards">
         <table class="data">
           <thead>
             <tr>
@@ -40,19 +40,19 @@
           <tbody>
             @foreach ($users as $user)
               <tr>
-                <td><strong>{{ $user->name }}</strong></td>
-                <td>{{ $user->email }}</td>
-                <td>{{ $user->phone ?: '—' }}</td>
-                <td>{{ $user->bookings_count }}</td>
-                <td>
+                <td data-label="Name"><strong>{{ $user->name }}</strong></td>
+                <td data-label="Email">{{ $user->email }}</td>
+                <td data-label="Mobile">{{ $user->phone ?: '—' }}</td>
+                <td data-label="Bookings">{{ $user->bookings_count }}</td>
+                <td data-label="Role">
                   @if ($user->is_admin)
                     <span class="pill pill-completed">Administrator</span>
                   @else
                     <span class="pill">Visitor</span>
                   @endif
                 </td>
-                <td>{{ $user->created_at->format('M j, Y') }}</td>
-                <td class="actions-cell">
+                <td data-label="Joined">{{ $user->created_at->format('M j, Y') }}</td>
+                <td class="actions-cell" data-label="">
                   <a href="{{ route('admin.users.show', $user) }}{{ $user->bookings_count > 0 ? '#permit-applications' : '' }}" class="btn btn-secondary btn-sm">
                     {{ $user->bookings_count > 0 ? 'Permits' : 'View' }}
                   </a>

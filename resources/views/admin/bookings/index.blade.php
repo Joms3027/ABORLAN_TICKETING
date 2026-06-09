@@ -32,7 +32,7 @@
     @if ($bookings->isEmpty())
       <p class="empty-state">No bookings match the current filters.</p>
     @else
-      <div class="table-wrap">
+      <div class="table-wrap table-cards">
         <table class="data">
           <thead>
             <tr>
@@ -49,15 +49,15 @@
           <tbody>
             @foreach ($bookings as $b)
               <tr>
-                <td><strong>{{ $b->reference_code }}</strong></td>
-                <td>
+                <td data-label="Reference"><strong>{{ $b->reference_code }}</strong></td>
+                <td data-label="User">
                   {{ $b->user?->name ?? '—' }}
                   @if ($b->user?->email)<div class="sub">{{ $b->user->email }}</div>@endif
                 </td>
-                <td>{{ $b->hike_date->format('M j, Y') }}</td>
-                <td>{{ $b->party_size }}</td>
-                <td><span class="pill pill-{{ $b->status }}">{{ $b->statusLabel() }}</span></td>
-                <td>
+                <td data-label="Hike date">{{ $b->hike_date->format('M j, Y') }}</td>
+                <td data-label="Party">{{ $b->party_size }}</td>
+                <td data-label="Status"><span class="pill pill-{{ $b->status }}">{{ $b->statusLabel() }}</span></td>
+                <td data-label="Tour guide">
                   @if ($b->status === 'approved' && $b->tourGuide)
                     {{ $b->tourGuide->name }}
                   @elseif ($b->status === 'approved')
@@ -66,8 +66,24 @@
                     —
                   @endif
                 </td>
-                <td>{{ $b->created_at->format('M j, Y') }}</td>
-                <td><a class="btn btn-secondary btn-sm" href="{{ route('admin.bookings.show', $b) }}">Review</a></td>
+                <td data-label="Submitted">{{ $b->created_at->format('M j, Y') }}</td>
+                <td class="actions-cell" data-label="">
+                  @if ($b->status === 'pending')
+                    <form method="POST" action="{{ route('admin.bookings.update', $b) }}">
+                      @csrf
+                      @method('PATCH')
+                      <input type="hidden" name="status" value="approved" />
+                      <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                    </form>
+                    <form method="POST" action="{{ route('admin.bookings.update', $b) }}" onsubmit="return confirm('Reject this permit application?');">
+                      @csrf
+                      @method('PATCH')
+                      <input type="hidden" name="status" value="rejected" />
+                      <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                    </form>
+                  @endif
+                  <a class="btn btn-secondary btn-sm" href="{{ route('admin.bookings.show', $b) }}">Review</a>
+                </td>
               </tr>
             @endforeach
           </tbody>

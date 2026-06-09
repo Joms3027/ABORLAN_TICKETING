@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Booking extends Model
 {
@@ -27,6 +28,7 @@ class Booking extends Model
         'trekking_route',
         'trekking_days',
         'members',
+        'health_declarations',
         'notes',
         'status',
         'admin_notes',
@@ -36,7 +38,8 @@ class Booking extends Model
     protected $casts = [
         'hike_date'  => 'date',
         'party_size' => 'integer',
-        'members'    => 'array',
+        'members'              => 'array',
+        'health_declarations'  => 'array',
         'decided_at' => 'datetime',
     ];
 
@@ -48,6 +51,11 @@ class Booking extends Model
     public function tourGuide(): BelongsTo
     {
         return $this->belongsTo(TourGuide::class);
+    }
+
+    public function feedback(): HasOne
+    {
+        return $this->hasOne(BookingFeedback::class);
     }
 
     public function scopeActive(Builder $query): Builder
@@ -74,8 +82,38 @@ class Booking extends Model
 
     public function isCancellable(): bool
     {
-        return in_array($this->status, [self::STATUS_PENDING, self::STATUS_APPROVED], true)
+        return $this->status === self::STATUS_PENDING
             && $this->hike_date
             && $this->hike_date->isFuture();
+    }
+
+    public function canReceiveFeedback(): bool
+    {
+        if ($this->relationLoaded('feedback') ? $this->feedback !== null : $this->feedback()->exists()) {
+            return false;
+        }
+
+        if ($this->status === self::STATUS_COMPLETED) {
+            return true;
+        }
+
+        if ($this->status === self::STATUS_APPROVED) {
+            return $this->hike_date && $this->hike_date->lte(today());
+        }
+
+        return false;
+    }
+
+    public function feedbackOpensOn(): ?\Illuminate\Support\Carbon
+    {
+        if ($this->status !== self::STATUS_APPROVED || ! $this->hike_date) {
+            return null;
+        }
+
+        if ($this->hike_date->lte(today())) {
+            return null;
+        }
+
+        return $this->hike_date;
     }
 }

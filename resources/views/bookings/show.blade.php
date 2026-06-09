@@ -9,7 +9,7 @@
   </div>
 
   <div class="panel">
-    <div class="panel-head">
+    <div class="panel-head panel-head--stack">
       <h2>Hike on {{ $booking->hike_date->format('l, F j, Y') }}</h2>
       <span class="pill pill-{{ $booking->status }}">{{ $booking->statusLabel() }}</span>
     </div>
@@ -64,6 +64,7 @@
     @endif
 
     @include('bookings.partials.permit-details')
+    @include('bookings.partials.health-declaration-summary')
 
     <div class="form-actions">
       <a href="{{ route('bookings.index') }}" class="btn btn-secondary">Back to my bookings</a>
@@ -77,12 +78,35 @@
     </div>
   </div>
 
+  @if ($booking->feedback)
+    <div class="panel">
+      <div class="panel-head"><h2>Your feedback</h2></div>
+      <p style="color: var(--text-muted); margin-bottom: 1rem;">Thank you for sharing your experience with the LGU.</p>
+      @include('bookings.partials.feedback-display')
+    </div>
+  @elseif ($booking->canReceiveFeedback())
+    <div class="panel" id="feedback">
+      <div class="panel-head"><h2>Share your feedback</h2></div>
+      <p style="color: var(--text-muted); margin-bottom: 1.1rem;">
+        How was your visit to Atup-atup Falls? Rate hospitality, your tour guide, and the place, and leave an optional comment.
+      </p>
+      @include('bookings.partials.feedback-form')
+    </div>
+  @elseif ($opens = $booking->feedbackOpensOn())
+    <div class="panel" id="feedback">
+      <div class="panel-head"><h2>Feedback</h2></div>
+      <p style="color: var(--text-muted);">
+        You can share feedback after your hike on <strong>{{ $opens->format('l, F j, Y') }}</strong>, or once the LGU marks your visit as completed.
+      </p>
+    </div>
+  @endif
+
   <div class="panel">
     <div class="panel-head"><h2>What to bring on hike day</h2></div>
     <ul style="padding-left: 1.1rem; display:grid; gap:0.4rem; color: var(--text);">
       <li>Valid ID (any government-issued ID).</li>
       <li>Printed or screenshot of this booking with reference <strong>{{ $booking->reference_code }}</strong> and your completed Visitors Entry Permit details.</li>
-      <li>Health declaration and waiver of risk forms if required by the LGU (<a href="{{ route('docs.view', ['f' => 'HEALTH DECLARATION FORM.pdf']) }}">health</a>, <a href="{{ route('docs.view', ['f' => 'ACKNOWLEDGEMENT AND WAIVER OF RISK.pdf']) }}">waiver</a>).</li>
+      <li>Your online health declaration is on file with this booking. Bring the <a href="{{ route('docs.view', ['f' => 'ACKNOWLEDGEMENT AND WAIVER OF RISK.pdf']) }}">waiver of risk</a> if the LGU requires a signed copy on hike day.</li>
       <li>Drinking water, light snacks, and sturdy shoes for trekking.</li>
       <li>A small bag for trash — please pack out everything you bring in.</li>
       <li>Arrive at <strong>Sitio Manaile, Brgy. Dumanguena, Narra, Palawan</strong> by 7:00 AM unless instructed otherwise.</li>
