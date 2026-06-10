@@ -10,8 +10,12 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AtupAtupController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\OpeningCeremonyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/opening', [OpeningCeremonyController::class, 'index'])->name('opening.index');
+Route::post('/opening/complete', [OpeningCeremonyController::class, 'complete'])->name('opening.complete');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
