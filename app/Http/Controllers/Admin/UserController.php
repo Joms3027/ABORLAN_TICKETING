@@ -45,7 +45,7 @@ class UserController extends Controller
             return back()->withErrors(['user' => 'You cannot change your own admin status.']);
         }
 
-        $user->update(['is_admin' => ! $user->is_admin]);
+        $user->forceFill(['is_admin' => ! $user->is_admin])->save();
 
         return back()->with('status', $user->name.' is now '.($user->is_admin ? 'an administrator' : 'a regular user').'.');
     }

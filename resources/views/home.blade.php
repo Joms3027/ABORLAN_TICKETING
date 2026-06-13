@@ -104,11 +104,12 @@
     /* Top bar */
     .top-bar {
       background: linear-gradient(115deg, #4c0519 0%, #701a75 38%, #1e1b4b 100%);
-      color: rgba(255, 255, 255, 0.9);
+      color: rgba(255, 255, 255, 0.92);
       font-size: 0.8125rem;
       font-weight: 500;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.01em;
       box-shadow: inset 0 -2px 0 var(--gold-light);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .top-bar .container {
@@ -116,87 +117,138 @@
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 0.75rem 1.5rem;
-      padding: 0.45rem 0;
-      letter-spacing: 0.02em;
+      gap: 0.65rem 1.25rem;
+      padding: 0.55rem 0;
     }
 
     .top-bar-meta {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem 1rem;
+      gap: 0.5rem 0.85rem;
       flex: 1;
-      min-width: min(100%, 28rem);
+      min-width: 0;
+    }
+
+    .top-bar-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.28rem 0.65rem 0.28rem 0.45rem;
+      border-radius: 999px;
+      background: rgba(255, 234, 0, 0.12);
+      border: 1px solid rgba(255, 234, 0, 0.35);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .top-bar-badge svg {
+      flex-shrink: 0;
+      color: var(--gold-light);
+    }
+
+    .top-bar-divider {
+      width: 1px;
+      height: 1.1rem;
+      background: rgba(255, 255, 255, 0.22);
+      flex-shrink: 0;
+    }
+
+    .top-bar-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.38rem;
+      color: rgba(255, 255, 255, 0.88);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      padding: 0.15rem 0.35rem;
+      margin: -0.15rem -0.35rem;
+      transition: color 0.15s var(--ease), background 0.15s var(--ease);
+    }
+
+    .top-bar-link:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .top-bar-link:focus-visible {
+      outline: 2px solid var(--gold-light);
+      outline-offset: 2px;
+    }
+
+    .top-bar-link svg {
+      flex-shrink: 0;
+      color: var(--magenta-bright);
+    }
+
+    .top-bar strong {
+      color: var(--gold-light);
+      font-weight: 700;
     }
 
     .top-bar-actions {
       display: flex;
       align-items: center;
-      gap: 0.45rem;
+      gap: 0.5rem;
       flex-shrink: 0;
     }
 
     .top-bar-actions .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
       font-size: 0.8125rem;
       font-weight: 600;
-      padding: 0.38rem 0.85rem;
+      padding: 0.42rem 0.9rem;
       border-radius: var(--radius-sm);
       white-space: nowrap;
+      line-height: 1.2;
+      transition: background 0.15s var(--ease), color 0.15s var(--ease), border-color 0.15s var(--ease), box-shadow 0.15s var(--ease), transform 0.12s var(--ease);
+    }
+
+    .top-bar-actions .btn svg {
+      flex-shrink: 0;
     }
 
     .btn-top-signin {
-      background: rgba(232, 121, 249, 0.15);
+      background: rgba(232, 121, 249, 0.12);
       color: #fff;
-      border: 1px solid var(--magenta-bright);
-      box-shadow: 0 0 20px rgba(232, 121, 249, 0.25);
+      border: 1px solid rgba(232, 121, 249, 0.55);
     }
 
     .btn-top-signin:hover {
       color: var(--navy);
       border-color: var(--gold-light);
       background: var(--gold-light);
-      box-shadow: 0 0 24px rgba(255, 234, 0, 0.45);
+      box-shadow: 0 0 20px rgba(255, 234, 0, 0.35);
     }
 
     .btn-top-book {
       background: var(--gold-light);
       color: var(--navy);
       border: none;
-      box-shadow: 0 1px 8px rgba(255, 234, 0, 0.5), 0 0 0 1px rgba(192, 38, 211, 0.45);
+      box-shadow: 0 1px 6px rgba(255, 234, 0, 0.45), 0 0 0 1px rgba(192, 38, 211, 0.35);
     }
 
     .btn-top-book:hover {
       background: #fff48f;
       color: var(--navy);
-      box-shadow: 0 2px 14px rgba(255, 234, 0, 0.55), 0 0 0 2px var(--teal);
+      box-shadow: 0 2px 12px rgba(255, 234, 0, 0.5), 0 0 0 2px var(--teal);
     }
 
-    .btn-top-signin:active {
-      transform: scale(0.97);
-    }
-
+    .btn-top-signin:active,
     .btn-top-book:active {
       transform: scale(0.97);
-      filter: brightness(0.95);
     }
 
     .top-bar-actions .btn:focus-visible {
       outline: 2px solid var(--gold-light);
       outline-offset: 2px;
-    }
-
-    .top-bar span {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
-
-    .top-bar strong {
-      color: var(--gold-light);
-      font-weight: 700;
-      text-shadow: 0 0 20px rgba(255, 234, 0, 0.35);
     }
 
     /* Header — editorial strip */
@@ -1888,16 +1940,45 @@
       }
     }
 
-    @media (max-width: 560px) {
+    @media (max-width: 768px) {
+      .top-bar-divider {
+        display: none;
+      }
+
       .top-bar-meta {
+        gap: 0.4rem 0.65rem;
+      }
+
+      .top-bar-badge {
+        font-size: 0.6875rem;
+        padding: 0.22rem 0.55rem 0.22rem 0.4rem;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .top-bar .container {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
+        gap: 0.55rem;
+      }
+
+      .top-bar-meta {
         justify-content: flex-start;
       }
 
       .top-bar-actions {
         width: 100%;
-        justify-content: flex-end;
+        justify-content: stretch;
+      }
+
+      .top-bar-actions form {
+        display: flex;
+        flex: 1;
+      }
+
+      .top-bar-actions .btn {
+        flex: 1;
+        min-height: 2.5rem;
       }
 
       .hero h1 {
@@ -1941,22 +2022,41 @@
     ];
   @endphp
   <a class="skip-link" href="#main-content">Skip to main content</a>
-  <div class="top-bar">
+  <div class="top-bar" role="region" aria-label="Contact and account shortcuts">
     <div class="container">
       <div class="top-bar-meta">
-        <span><strong>Official</strong> municipal e-service channel</span>
-        <span>Front desk: <strong>(XXX) XXX-XXXX</strong> · Mon–Fri, 8:00 AM – 5:00 PM</span>
+        <span class="top-bar-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          Official e-service
+        </span>
+        <span class="top-bar-divider" aria-hidden="true"></span>
+        <a href="tel:+630000000000" class="top-bar-link" aria-label="Call municipal front desk at (XXX) XXX-XXXX">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span>Front desk <strong>(XXX) XXX-XXXX</strong></span>
+        </a>
       </div>
       <div class="top-bar-actions">
         @auth
-          <a href="{{ auth()->user()->is_admin ? route('admin.dashboard') : route('bookings.index') }}" class="btn btn-top-signin">{{ auth()->user()->is_admin ? 'Admin dashboard' : 'My bookings' }}</a>
+          <a href="{{ auth()->user()->is_admin ? route('admin.dashboard') : route('bookings.index') }}" class="btn btn-top-signin">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            {{ auth()->user()->is_admin ? 'Admin dashboard' : 'My bookings' }}
+          </a>
           <form method="POST" action="{{ route('logout') }}" style="margin:0;">
             @csrf
-            <button type="submit" class="btn btn-top-book" style="border:none; cursor:pointer;">Sign out</button>
+            <button type="submit" class="btn btn-top-book" style="border:none; cursor:pointer;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sign out
+            </button>
           </form>
         @else
-          <a href="{{ route('login') }}" class="btn btn-top-signin">Sign in</a>
-          <a href="{{ route('atup.overview') }}" class="btn btn-top-book">Book Atup-atup hike</a>
+          <a href="{{ route('login') }}" class="btn btn-top-signin">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Sign in
+          </a>
+          <a href="{{ route('atup.overview') }}" class="btn btn-top-book">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Book Atup-atup hike
+          </a>
         @endauth
       </div>
     </div>
@@ -2562,5 +2662,9 @@
       start();
     })();
   </script>
+  @auth
+    @include('partials.logout-confirm-modal')
+    <script src="{{ asset('js/logout-confirm.js') }}" defer></script>
+  @endauth
 </body>
 </html>

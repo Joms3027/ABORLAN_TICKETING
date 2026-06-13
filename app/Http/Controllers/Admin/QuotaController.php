@@ -33,12 +33,51 @@ class QuotaController extends Controller
             }
         }
 
+        $presetSlots        = null;
+        $presetMaxBookings  = null;
+        $presetNote         = null;
+        if ($quotaPresetDate) {
+            $custom = $customDates->first(
+                fn ($row) => Carbon::parse($row->quota_date)->toDateString() === $quotaPresetDate
+            );
+            if ($custom) {
+                $presetSlots       = (int) $custom->slots;
+                $presetMaxBookings = $custom->max_bookings;
+                $presetNote        = $custom->note;
+            } else {
+                $availRow = collect($availability)->firstWhere('date', $quotaPresetDate);
+                $presetSlots = $availRow['quota'] ?? $defaultQuota;
+            }
+        }
+
+        $fullDays  = 0;
+        $tightDays = 0;
+        $openDays  = 0;
+        foreach ($availability as $row) {
+            if (! $row['accepts_new_bookings']) {
+                $fullDays++;
+            } elseif ($row['remaining'] <= max(1, (int) ($row['quota'] * 0.2))) {
+                $tightDays++;
+            } else {
+                $openDays++;
+            }
+        }
+
         return view('admin.quotas.index', [
             'availability'       => $availability,
             'defaultQuota'       => $defaultQuota,
             'defaultMaxBookings' => BookingAvailability::defaultMaxBookings(),
             'customDates'        => $customDates,
             'quotaPresetDate'    => $quotaPresetDate,
+            'presetSlots'        => $presetSlots,
+            'presetMaxBookings'  => $presetMaxBookings,
+            'presetNote'         => $presetNote,
+            'stats'              => [
+                'full_days'       => $fullDays,
+                'tight_days'      => $tightDays,
+                'open_days'       => $openDays,
+                'overrides_total' => $customDates->count(),
+            ],
         ]);
     }
 

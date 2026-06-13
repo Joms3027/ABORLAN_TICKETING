@@ -828,6 +828,8 @@
       });
     })();
   </script>
+  @include('partials.logout-confirm-modal')
+  <script src="{{ asset('js/logout-confirm.js') }}" defer></script>
   @stack('scripts')
 </body>
 </html>

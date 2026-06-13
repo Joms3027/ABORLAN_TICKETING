@@ -38,8 +38,11 @@ class Booking extends Model
     protected $casts = [
         'hike_date'  => 'date',
         'party_size' => 'integer',
-        'members'              => 'array',
-        'health_declarations'  => 'array',
+        'contact_phone'        => 'encrypted',
+        'emergency_contact'    => 'encrypted',
+        'visitor_address'      => 'encrypted',
+        'members'              => 'encrypted:array',
+        'health_declarations'  => 'encrypted:array',
         'decided_at' => 'datetime',
     ];
 

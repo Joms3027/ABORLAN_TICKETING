@@ -143,72 +143,184 @@
 
     .tg-tab-panel[hidden] { display: none !important; }
 
+    .tg-section-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-items: center;
+      margin-bottom: 1.15rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tg-section-toolbar .tg-search-wrap {
+      flex: 1;
+      min-width: 180px;
+      position: relative;
+    }
+    .tg-section-toolbar .tg-search-wrap svg {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1rem;
+      height: 1rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .tg-section-toolbar .tg-search-wrap .input {
+      padding-left: 2.25rem;
+      font-size: 0.875rem;
+    }
+    .tg-filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+    .tg-filter-chip {
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--text-muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s var(--ease);
+    }
+    .tg-filter-chip:hover { border-color: var(--admin-accent); color: var(--admin-accent-hover); }
+    .tg-filter-chip.is-active {
+      background: var(--admin-accent-muted);
+      border-color: var(--admin-accent);
+      color: var(--admin-accent-hover);
+    }
+    .tg-section-toolbar .tg-toolbar-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
     .tg-guide-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.85rem;
     }
     .tg-guide-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1.15rem 1.2rem;
+      overflow: hidden;
       box-shadow: var(--shadow-sm);
-      transition: box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
+      transition: box-shadow 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.2s var(--ease);
     }
     .tg-guide-card:hover { box-shadow: var(--shadow); border-color: #e9d5ef; }
-    .tg-guide-card.is-busy-today { border-left: 3px solid var(--admin-accent); }
+    .tg-guide-card.is-busy-today { border-top: 3px solid var(--admin-accent); }
+    .tg-guide-card.is-editing { border-color: var(--admin-accent); box-shadow: 0 0 0 3px rgba(192, 38, 211, 0.12); }
+    .tg-guide-card.is-hidden { display: none; }
+    .tg-guide-card-body { padding: 1rem 1.1rem; }
     .tg-guide-top {
       display: flex;
-      align-items: center;
-      gap: 0.85rem;
-      margin-bottom: 1rem;
+      align-items: flex-start;
+      gap: 0.75rem;
     }
     .tg-avatar {
-      width: 3rem;
-      height: 3rem;
+      width: 2.75rem;
+      height: 2.75rem;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 700;
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       color: #fff;
       background: linear-gradient(135deg, var(--admin-accent) 0%, #9333ea 100%);
-      box-shadow: 0 2px 10px rgba(192, 38, 211, 0.3);
+      box-shadow: 0 2px 8px rgba(192, 38, 211, 0.25);
       flex-shrink: 0;
     }
-    .tg-guide-meta h3 { font-size: 1rem; font-weight: 700; color: var(--navy); line-height: 1.25; }
-    .tg-guide-meta .sub { font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.15rem; }
-    .tg-guide-badges {
+    .tg-guide-meta { flex: 1; min-width: 0; }
+    .tg-guide-meta h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.3;
+      word-break: break-word;
+    }
+    .tg-guide-meta .sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.1rem; }
+    .tg-status-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: 0.45rem;
+    }
+    .tg-status-dot::before {
+      content: "";
+      width: 0.45rem;
+      height: 0.45rem;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .tg-status-dot.is-available { color: #15803d; }
+    .tg-status-dot.is-available::before { background: #22c55e; box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25); }
+    .tg-status-dot.is-busy { color: var(--admin-accent-hover); }
+    .tg-status-dot.is-busy::before { background: var(--admin-accent); box-shadow: 0 0 0 2px rgba(192, 38, 211, 0.25); }
+    .tg-guide-stats {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+    .tg-guide-stat {
+      flex: 1;
+      text-align: center;
+      padding: 0.45rem 0.35rem;
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+    }
+    .tg-guide-stat .num { font-size: 1.1rem; font-weight: 700; color: var(--navy); line-height: 1; }
+    .tg-guide-stat .lbl { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-top: 0.15rem; }
+    .tg-guide-footer {
       display: flex;
       flex-wrap: wrap;
       gap: 0.35rem;
-      margin-left: auto;
-      align-self: flex-start;
+      padding: 0.65rem 1.1rem;
+      background: #fafafa;
+      border-top: 1px solid var(--border);
+      align-items: center;
     }
+    .tg-guide-footer .tg-link-assign { margin-left: auto; }
+    .tg-guide-edit {
+      padding: 0 1.1rem 1rem;
+      border-top: 1px dashed var(--border);
+      background: #fdf4ff;
+    }
+    .tg-guide-edit[hidden] { display: none !important; }
     .tg-guide-form {
       display: grid;
       grid-template-columns: 1fr auto;
       gap: 0.65rem;
       align-items: end;
+      padding-top: 0.85rem;
     }
-    .tg-guide-actions {
+    .tg-guide-form-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 0.4rem;
-      margin-top: 0.85rem;
-      padding-top: 0.85rem;
-      border-top: 1px solid var(--border);
+      grid-column: 1 / -1;
+      margin-top: 0.25rem;
       align-items: center;
     }
-    .tg-guide-actions .tg-link-assign { margin-left: auto; }
+    .tg-guide-form-actions .tg-delete-form { margin-left: auto; }
 
     .tg-tabs {
       display: flex;
       flex-wrap: wrap;
       gap: 0.35rem;
-      margin-bottom: 1.15rem;
+      margin-bottom: 1rem;
       padding: 0.25rem;
       background: var(--bg);
       border-radius: var(--radius-sm);
@@ -217,6 +329,9 @@
       max-width: 100%;
     }
     .tg-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
       padding: 0.45rem 0.9rem;
       border-radius: 6px;
       font-size: 0.8125rem;
@@ -234,73 +349,172 @@
       color: var(--admin-accent-hover);
       box-shadow: var(--shadow-sm);
     }
+    .tg-tab .tg-tab-count {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.08rem 0.4rem;
+      border-radius: 999px;
+      background: var(--bg);
+      color: var(--navy);
+    }
+    .tg-tab.is-active .tg-tab-count { background: var(--admin-accent-muted); color: var(--admin-accent-hover); }
     .tg-tab-panel { display: none; }
     .tg-tab-panel.is-active { display: block; }
 
+    .tg-monitor-empty-hero {
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, #faf5ff 0%, #f4f0f7 100%);
+      border: 1px dashed var(--border);
+    }
+    .tg-monitor-empty-hero svg {
+      width: 2.75rem;
+      height: 2.75rem;
+      color: var(--admin-accent);
+      margin-bottom: 0.75rem;
+      opacity: 0.85;
+    }
+    .tg-monitor-empty-hero h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 0.35rem;
+    }
+    .tg-monitor-empty-hero p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      max-width: 28rem;
+      margin: 0 auto;
+      line-height: 1.55;
+    }
+    .tg-monitor-list { display: flex; flex-direction: column; gap: 0.5rem; }
     .tg-guide-monitor {
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       overflow: hidden;
-      margin-bottom: 0.75rem;
       background: #fff;
+      transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
     }
-    .tg-guide-monitor:last-child { margin-bottom: 0; }
+    .tg-guide-monitor:hover { border-color: #e9d5ef; }
+    .tg-guide-monitor.is-empty { opacity: 0.85; }
+    .tg-guide-monitor.is-hidden { display: none; }
+    .tg-guide-monitor[open] { box-shadow: var(--shadow-sm); border-color: #e9d5ef; }
     .tg-guide-monitor summary {
       list-style: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      padding: 0.85rem 1rem;
-      background: #faf5ff;
+      padding: 0.8rem 1rem;
+      background: #fafafa;
       font-weight: 600;
       color: var(--navy);
+      user-select: none;
+      transition: background 0.15s var(--ease);
     }
+    .tg-guide-monitor summary:hover { background: #f5f0fa; }
+    .tg-guide-monitor[open] summary { background: #faf5ff; border-bottom: 1px solid var(--border); }
     .tg-guide-monitor summary::-webkit-details-marker { display: none; }
-    .tg-guide-monitor summary::after {
-      content: "";
+    .tg-guide-monitor .tg-monitor-chevron {
       margin-left: auto;
-      width: 0.5rem;
-      height: 0.5rem;
-      border-right: 2px solid var(--text-muted);
-      border-bottom: 2px solid var(--text-muted);
-      transform: rotate(45deg);
+      width: 1.25rem;
+      height: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
       transition: transform 0.2s var(--ease);
+      flex-shrink: 0;
     }
-    .tg-guide-monitor[open] summary::after {
-      transform: rotate(-135deg);
-      margin-top: 0.25rem;
+    .tg-guide-monitor[open] .tg-monitor-chevron { transform: rotate(180deg); }
+    .tg-guide-monitor .tg-monitor-name {
+      flex: 1;
+      min-width: 0;
+      font-size: 0.9rem;
     }
-    .tg-guide-monitor .tg-monitor-body {
-      padding: 0 1rem 1rem;
-      border-top: 1px solid var(--border);
+    .tg-guide-monitor .tg-monitor-name .muted {
+      font-weight: 400;
+      font-size: 0.78rem;
     }
-    .tg-guide-monitor .tg-avatar { width: 2.25rem; height: 2.25rem; font-size: 0.85rem; }
+    .tg-guide-monitor .tg-group-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.75rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: var(--bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .tg-guide-monitor .tg-group-badge.has-groups {
+      background: #dcfce7;
+      color: #14532d;
+      border-color: #86efac;
+    }
+    .tg-guide-monitor .tg-monitor-body { padding: 0.5rem 1rem 0.85rem; }
+    .tg-guide-monitor .tg-avatar { width: 2rem; height: 2rem; font-size: 0.75rem; }
     .tg-empty-inline {
-      padding: 1.25rem 1rem;
+      padding: 1rem;
       text-align: center;
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
     }
     .tg-booking-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 0.5rem 1rem;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 0.65rem 0.85rem;
       align-items: center;
-      padding: 0.75rem 0;
+      padding: 0.65rem 0;
       border-bottom: 1px solid var(--border);
     }
     .tg-booking-row:last-child { border-bottom: none; }
-    .tg-booking-ref { font-weight: 700; color: var(--navy); font-size: 0.9rem; }
-    .tg-booking-meta { font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .tg-booking-date-badge {
+      width: 2.75rem;
+      text-align: center;
+      padding: 0.35rem 0.25rem;
+      border-radius: var(--radius-sm);
+      background: var(--admin-accent-muted);
+      flex-shrink: 0;
+    }
+    .tg-booking-date-badge .day {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--admin-accent-hover);
+      line-height: 1;
+    }
+    .tg-booking-date-badge .mon {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-top: 0.1rem;
+    }
+    .tg-booking-ref { font-weight: 700; color: var(--navy); font-size: 0.875rem; }
+    .tg-booking-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.1rem; }
     .tg-booking-side { text-align: right; }
-    .tg-booking-date { font-size: 0.8125rem; font-weight: 600; color: var(--navy); }
+    .tg-roster-no-match {
+      display: none;
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .tg-roster-no-match.is-visible { display: block; }
 
     @media (max-width: 640px) {
       .tg-guide-form { grid-template-columns: 1fr; }
-      .tg-guide-badges { margin-left: 0; width: 100%; }
-      .tg-guide-top { flex-wrap: wrap; }
-      .tg-guide-actions .tg-link-assign { margin-left: 0; width: 100%; }
+      .tg-guide-footer .tg-link-assign { margin-left: 0; width: 100%; }
+      .tg-section-toolbar .tg-toolbar-meta { width: 100%; margin-left: 0; }
+      .tg-booking-row { grid-template-columns: auto 1fr; }
+      .tg-booking-side { grid-column: 2; text-align: left; }
     }
   </style>
 @endpush
@@ -407,8 +621,10 @@
 
   <div class="panel tg-page-section" id="roster">
     <div class="panel-head">
-      <h2>Guide roster</h2>
-      <span class="muted">{{ $guides->count() }} {{ \Illuminate\Support\Str::plural('guide', $guides->count()) }}</span>
+      <div>
+        <h2>Guide roster</h2>
+        <span class="muted">{{ $guides->count() }} {{ \Illuminate\Support\Str::plural('guide', $guides->count()) }} registered</span>
+      </div>
     </div>
 
     @if ($guides->isEmpty())
@@ -417,76 +633,120 @@
         <span style="font-size: 0.9rem; color: var(--text-muted);">Add your first guide above, then approve bookings to assign them automatically.</span>
       </div>
     @else
-      <div class="tg-guide-grid">
+      <div class="tg-section-toolbar" role="search">
+        <div class="tg-search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="search" id="roster-search" class="input" placeholder="Search guides by name…" autocomplete="off" aria-label="Search guides" />
+        </div>
+        <div class="tg-filter-chips" role="group" aria-label="Filter roster">
+          <button type="button" class="tg-filter-chip is-active" data-roster-filter="all">All</button>
+          <button type="button" class="tg-filter-chip" data-roster-filter="available">Available today</button>
+          <button type="button" class="tg-filter-chip" data-roster-filter="busy">On duty today</button>
+        </div>
+        <span class="tg-toolbar-meta" id="roster-count-label">{{ $guides->count() }} shown</span>
+      </div>
+
+      <div class="tg-guide-grid" id="roster-grid">
         @foreach ($guides as $guide)
           @php
             $guideBookings = $upcomingAssignments->get($guide->id, collect());
             $busyToday = $busyTodayIds->contains($guide->id);
           @endphp
-          <article class="tg-guide-card {{ $busyToday ? 'is-busy-today' : '' }}">
-            <div class="tg-guide-top">
-              <div class="tg-avatar" aria-hidden="true">{{ $initials($guide->name) ?: '?' }}</div>
-              <div class="tg-guide-meta">
-                <h3>{{ $guide->name }}</h3>
-                <p class="sub">Age {{ $guide->age }}</p>
+          <article
+            class="tg-guide-card {{ $busyToday ? 'is-busy-today' : '' }}"
+            data-guide-name="{{ strtolower($guide->name) }}"
+            data-guide-status="{{ $busyToday ? 'busy' : 'available' }}"
+            data-guide-id="{{ $guide->id }}"
+          >
+            <div class="tg-guide-card-body">
+              <div class="tg-guide-top">
+                <div class="tg-avatar" aria-hidden="true">{{ $initials($guide->name) ?: '?' }}</div>
+                <div class="tg-guide-meta">
+                  <h3>{{ $guide->name }}</h3>
+                  <p class="sub">Age {{ $guide->age }}</p>
+                  <span class="tg-status-dot {{ $busyToday ? 'is-busy' : 'is-available' }}">
+                    {{ $busyToday ? 'On duty today' : 'Available today' }}
+                  </span>
+                </div>
               </div>
-              <div class="tg-guide-badges">
-                @if ($busyToday)
-                  <span class="pill pill-approved">On duty today</span>
-                @else
-                  <span class="pill">Available today</span>
-                @endif
-                @if ($guideBookings->isNotEmpty())
-                  <span class="pill pill-completed">{{ $guideBookings->count() }} upcoming</span>
-                @endif
+              <div class="tg-guide-stats">
+                <div class="tg-guide-stat">
+                  <div class="num">{{ $guideBookings->count() }}</div>
+                  <div class="lbl">Upcoming</div>
+                </div>
+                <div class="tg-guide-stat">
+                  <div class="num">{{ $busyToday ? '1' : '0' }}</div>
+                  <div class="lbl">Today</div>
+                </div>
               </div>
             </div>
 
-            <form method="POST" action="{{ route('admin.tour-guides.update', $guide) }}" class="tg-guide-form">
-              @csrf
-              @method('PATCH')
-              <div class="field" style="margin:0;">
-                <label class="hint" for="name-{{ $guide->id }}">Name</label>
-                <input type="text" id="name-{{ $guide->id }}" name="name" class="input" value="{{ $guide->name }}" required maxlength="120" />
-              </div>
-              <div class="field" style="margin:0;">
-                <label class="hint" for="age-{{ $guide->id }}">Age</label>
-                <input type="number" id="age-{{ $guide->id }}" name="age" class="input" value="{{ $guide->age }}" required min="18" max="80" style="max-width: 5.5rem;" />
-              </div>
-              <div class="tg-guide-actions" style="grid-column: 1 / -1; border-top: none; padding-top: 0; margin-top: 0.25rem;">
-                <button type="submit" class="btn btn-primary btn-sm">Save changes</button>
-                @if ($guideBookings->isNotEmpty())
-                  <a href="#monitor-guide-{{ $guide->id }}" class="btn btn-secondary btn-sm tg-link-assign">View assignments</a>
-                @endif
-              </div>
-            </form>
+            <div class="tg-guide-footer">
+              <button type="button" class="btn btn-secondary btn-sm" data-tg-edit-toggle aria-expanded="false">Edit</button>
+              @if ($guideBookings->isNotEmpty())
+                <a href="#monitor-guide-{{ $guide->id }}" class="btn btn-ghost btn-sm tg-link-assign">View assignments</a>
+              @endif
+            </div>
 
-            <form method="POST" action="{{ route('admin.tour-guides.destroy', $guide) }}" class="tg-guide-actions" style="border-top: none; padding-top: 0.35rem;" onsubmit="return confirm('Remove {{ $guide->name }} from the roster?');">
-              @csrf
-              @method('DELETE')
-              <button type="submit" class="btn btn-ghost btn-sm" @if ($guideBookings->isNotEmpty()) disabled title="Reassign or complete upcoming hikes before deleting" @endif>Delete guide</button>
-            </form>
+            <div class="tg-guide-edit" hidden>
+              <form method="POST" action="{{ route('admin.tour-guides.update', $guide) }}" class="tg-guide-form" id="edit-form-{{ $guide->id }}">
+                @csrf
+                @method('PATCH')
+                <div class="field" style="margin:0;">
+                  <label for="name-{{ $guide->id }}">Full name</label>
+                  <input type="text" id="name-{{ $guide->id }}" name="name" class="input" value="{{ $guide->name }}" required maxlength="120" />
+                </div>
+                <div class="field" style="margin:0;">
+                  <label for="age-{{ $guide->id }}">Age</label>
+                  <input type="number" id="age-{{ $guide->id }}" name="age" class="input" value="{{ $guide->age }}" required min="18" max="80" style="max-width: 5.5rem;" />
+                </div>
+                <div class="tg-guide-form-actions">
+                  <button type="submit" class="btn btn-primary btn-sm">Save changes</button>
+                  <button type="button" class="btn btn-ghost btn-sm" data-tg-edit-cancel>Cancel</button>
+                </div>
+              </form>
+              <form method="POST" action="{{ route('admin.tour-guides.destroy', $guide) }}" class="tg-guide-form-actions" style="padding-top: 0; margin-top: -0.25rem;" onsubmit="return confirm('Remove {{ $guide->name }} from the roster?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--danger); margin-left: auto;" @if ($guideBookings->isNotEmpty()) disabled title="Reassign or complete upcoming hikes before deleting" @endif>Delete guide</button>
+              </form>
+            </div>
           </article>
         @endforeach
       </div>
+      <p class="tg-roster-no-match" id="roster-no-match">No guides match your search or filter.</p>
     @endif
   </div>
 
   <div class="panel tg-page-section" id="monitor">
     <div class="panel-head">
-      <h2>Assignment monitor</h2>
-      <span class="muted">Approved hikes from today onward</span>
+      <div>
+        <h2>Assignment monitor</h2>
+        <span class="muted">Approved hikes from today onward</span>
+      </div>
     </div>
 
     @if ($guides->isEmpty() && $unassignedApproved->isEmpty())
-      <p class="tg-empty-inline">Add guides to the roster to start tracking assignments.</p>
+      <div class="tg-monitor-empty-hero">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        <h3>No guides to monitor yet</h3>
+        <p>Add guides to the roster first. Once bookings are approved, assignments will appear here automatically.</p>
+      </div>
     @else
+
       <div class="tg-tabs" role="tablist" aria-label="Assignment views">
-        <button type="button" class="tg-tab is-active" role="tab" aria-selected="true" aria-controls="panel-by-guide" id="tab-by-guide" data-tg-tab="by-guide">By guide</button>
-        <button type="button" class="tg-tab" role="tab" aria-selected="false" aria-controls="panel-all" id="tab-all" data-tg-tab="all">All upcoming</button>
+        <button type="button" class="tg-tab is-active" role="tab" aria-selected="true" aria-controls="panel-by-guide" id="tab-by-guide" data-tg-tab="by-guide">
+          By guide
+          <span class="tg-tab-count">{{ $guides->count() }}</span>
+        </button>
+        <button type="button" class="tg-tab" role="tab" aria-selected="false" aria-controls="panel-all" id="tab-all" data-tg-tab="all">
+          All upcoming
+          <span class="tg-tab-count">{{ $upcomingCount }}</span>
+        </button>
         @if ($unassignedApproved->isNotEmpty())
           <button type="button" class="tg-tab" role="tab" aria-selected="false" aria-controls="panel-unassigned" id="tab-unassigned" data-tg-tab="unassigned">
-            Needs guide ({{ $unassignedApproved->count() }})
+            Needs guide
+            <span class="tg-tab-count">{{ $unassignedApproved->count() }}</span>
           </button>
         @endif
       </div>
@@ -494,40 +754,40 @@
       <div id="panel-by-guide" class="tg-tab-panel is-active" role="tabpanel" aria-labelledby="tab-by-guide">
         @if ($guides->isEmpty())
           <p class="tg-empty-inline">No guides in the roster.</p>
+        @elseif ($upcomingCount === 0 && $unassignedApproved->isEmpty())
+          <div class="tg-monitor-empty-hero">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <h3>No upcoming assignments</h3>
+            <p>All {{ $guides->count() }} guides are free. Assignments appear here when you approve bookings for future hike dates.</p>
+          </div>
+          <div class="tg-section-toolbar" style="border-bottom: none; padding-bottom: 0; margin-top: 1rem;">
+            <span class="tg-toolbar-meta" style="margin-left: 0;">Roster overview</span>
+            <button type="button" class="btn btn-secondary btn-sm" id="monitor-toggle-empty" style="margin-left: auto;">Show all guides</button>
+          </div>
+          <div class="tg-monitor-list" id="monitor-list" hidden>
+            @foreach ($guides as $guide)
+              @php $guideBookings = $upcomingAssignments->get($guide->id, collect()); @endphp
+              @include('admin.tour-guides.partials.monitor-row', ['guide' => $guide, 'guideBookings' => $guideBookings, 'initials' => $initials])
+            @endforeach
+          </div>
         @else
-          @foreach ($guides as $guide)
-            @php $guideBookings = $upcomingAssignments->get($guide->id, collect()); @endphp
-            <details class="tg-guide-monitor" id="monitor-guide-{{ $guide->id }}" {{ $guideBookings->isNotEmpty() ? 'open' : '' }}>
-              <summary>
-                <span class="tg-avatar" aria-hidden="true">{{ $initials($guide->name) ?: '?' }}</span>
-                <span>{{ $guide->name }} <span class="muted" style="font-weight:400;font-size:0.85rem;">· age {{ $guide->age }}</span></span>
-                <span class="pill {{ $guideBookings->isEmpty() ? '' : 'pill-approved' }}">
-                  {{ $guideBookings->count() }} {{ \Illuminate\Support\Str::plural('group', $guideBookings->count()) }}
-                </span>
-              </summary>
-              <div class="tg-monitor-body">
-                @if ($guideBookings->isEmpty())
-                  <p class="tg-empty-inline">No upcoming assignments.</p>
-                @else
-                  @foreach ($guideBookings as $booking)
-                    <div class="tg-booking-row">
-                      <div>
-                        <div class="tg-booking-ref">{{ $booking->reference_code }}</div>
-                        <div class="tg-booking-meta">
-                          {{ $booking->user?->name ?? '—' }}
-                          @if ($booking->party_size > 1) · {{ $booking->party_size }} hikers @endif
-                        </div>
-                      </div>
-                      <div class="tg-booking-side">
-                        <div class="tg-booking-date">{{ $booking->hike_date->format('D, M j') }}</div>
-                        <a href="{{ route('admin.bookings.show', $booking) }}" class="btn btn-secondary btn-sm" style="margin-top:0.35rem;">Open</a>
-                      </div>
-                    </div>
-                  @endforeach
-                @endif
-              </div>
-            </details>
-          @endforeach
+          <div class="tg-section-toolbar">
+            <div class="tg-search-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input type="search" id="monitor-search" class="input" placeholder="Search guides…" autocomplete="off" aria-label="Search guides in monitor" />
+            </div>
+            <div class="tg-filter-chips" role="group" aria-label="Filter monitor">
+              <button type="button" class="tg-filter-chip is-active" data-monitor-filter="assigned">With assignments</button>
+              <button type="button" class="tg-filter-chip" data-monitor-filter="all">All guides</button>
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm" id="monitor-expand-all" style="margin-left: auto;">Expand all</button>
+          </div>
+          <div class="tg-monitor-list" id="monitor-list">
+            @foreach ($guides as $guide)
+              @php $guideBookings = $upcomingAssignments->get($guide->id, collect()); @endphp
+              @include('admin.tour-guides.partials.monitor-row', ['guide' => $guide, 'guideBookings' => $guideBookings, 'initials' => $initials])
+            @endforeach
+          </div>
         @endif
       </div>
 
@@ -652,6 +912,7 @@
           var block = document.querySelector(hash);
           if (block && block.tagName === 'DETAILS') {
             block.open = true;
+            block.classList.remove('is-hidden');
             block.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
           }
         }
@@ -659,6 +920,131 @@
 
       window.addEventListener('hashchange', syncFromHash);
       syncFromHash();
+
+      /* Roster: search + filter */
+      var rosterSearch = document.getElementById('roster-search');
+      var rosterGrid = document.getElementById('roster-grid');
+      var rosterNoMatch = document.getElementById('roster-no-match');
+      var rosterCountLabel = document.getElementById('roster-count-label');
+      var rosterFilter = 'all';
+
+      function applyRosterFilters() {
+        if (!rosterGrid) return;
+        var query = (rosterSearch && rosterSearch.value || '').trim().toLowerCase();
+        var cards = rosterGrid.querySelectorAll('.tg-guide-card');
+        var shown = 0;
+        cards.forEach(function (card) {
+          var name = card.getAttribute('data-guide-name') || '';
+          var status = card.getAttribute('data-guide-status') || '';
+          var matchQuery = !query || name.indexOf(query) !== -1;
+          var matchFilter = rosterFilter === 'all'
+            || (rosterFilter === 'available' && status === 'available')
+            || (rosterFilter === 'busy' && status === 'busy');
+          var visible = matchQuery && matchFilter;
+          card.classList.toggle('is-hidden', !visible);
+          if (visible) shown++;
+        });
+        if (rosterCountLabel) rosterCountLabel.textContent = shown + ' shown';
+        if (rosterNoMatch) rosterNoMatch.classList.toggle('is-visible', shown === 0);
+      }
+
+      if (rosterSearch) rosterSearch.addEventListener('input', applyRosterFilters);
+      document.querySelectorAll('[data-roster-filter]').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          document.querySelectorAll('[data-roster-filter]').forEach(function (c) { c.classList.remove('is-active'); });
+          chip.classList.add('is-active');
+          rosterFilter = chip.getAttribute('data-roster-filter');
+          applyRosterFilters();
+        });
+      });
+
+      /* Roster: edit toggle */
+      document.querySelectorAll('[data-tg-edit-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var card = btn.closest('.tg-guide-card');
+          if (!card) return;
+          var panel = card.querySelector('.tg-guide-edit');
+          var open = panel && panel.hidden;
+          document.querySelectorAll('.tg-guide-card.is-editing').forEach(function (other) {
+            if (other === card) return;
+            other.classList.remove('is-editing');
+            var p = other.querySelector('.tg-guide-edit');
+            var t = other.querySelector('[data-tg-edit-toggle]');
+            if (p) p.hidden = true;
+            if (t) { t.setAttribute('aria-expanded', 'false'); t.textContent = 'Edit'; }
+          });
+          if (!panel) return;
+          panel.hidden = !open;
+          card.classList.toggle('is-editing', open);
+          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          btn.textContent = open ? 'Close' : 'Edit';
+          if (open) {
+            var input = panel.querySelector('input[name="name"]');
+            if (input) input.focus();
+          }
+        });
+      });
+
+      document.querySelectorAll('[data-tg-edit-cancel]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var card = btn.closest('.tg-guide-card');
+          if (!card) return;
+          var panel = card.querySelector('.tg-guide-edit');
+          var toggle = card.querySelector('[data-tg-edit-toggle]');
+          if (panel) panel.hidden = true;
+          card.classList.remove('is-editing');
+          if (toggle) { toggle.setAttribute('aria-expanded', 'false'); toggle.textContent = 'Edit'; }
+        });
+      });
+
+      /* Monitor: search + filter */
+      var monitorSearch = document.getElementById('monitor-search');
+      var monitorList = document.getElementById('monitor-list');
+      var monitorFilter = 'assigned';
+
+      function applyMonitorFilters() {
+        if (!monitorList) return;
+        var query = (monitorSearch && monitorSearch.value || '').trim().toLowerCase();
+        monitorList.querySelectorAll('.tg-guide-monitor').forEach(function (row) {
+          var name = row.getAttribute('data-monitor-name') || '';
+          var hasGroups = row.getAttribute('data-monitor-has-groups') === '1';
+          var matchQuery = !query || name.indexOf(query) !== -1;
+          var matchFilter = monitorFilter === 'all' || hasGroups;
+          row.classList.toggle('is-hidden', !(matchQuery && matchFilter));
+        });
+      }
+
+      if (monitorSearch) monitorSearch.addEventListener('input', applyMonitorFilters);
+      document.querySelectorAll('[data-monitor-filter]').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          document.querySelectorAll('[data-monitor-filter]').forEach(function (c) { c.classList.remove('is-active'); });
+          chip.classList.add('is-active');
+          monitorFilter = chip.getAttribute('data-monitor-filter');
+          applyMonitorFilters();
+        });
+      });
+
+      if (monitorList && monitorFilter === 'assigned') applyMonitorFilters();
+
+      var expandBtn = document.getElementById('monitor-expand-all');
+      if (expandBtn && monitorList) {
+        expandBtn.addEventListener('click', function () {
+          var rows = monitorList.querySelectorAll('.tg-guide-monitor:not(.is-hidden)');
+          var anyClosed = false;
+          rows.forEach(function (row) { if (!row.open) anyClosed = true; });
+          rows.forEach(function (row) { row.open = anyClosed; });
+          expandBtn.textContent = anyClosed ? 'Collapse all' : 'Expand all';
+        });
+      }
+
+      var toggleEmptyBtn = document.getElementById('monitor-toggle-empty');
+      if (toggleEmptyBtn && monitorList) {
+        toggleEmptyBtn.addEventListener('click', function () {
+          var hidden = monitorList.hidden;
+          monitorList.hidden = !hidden;
+          toggleEmptyBtn.textContent = hidden ? 'Hide guide list' : 'Show all guides';
+        });
+      }
     })();
   </script>
 @endpush

@@ -8,6 +8,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
@@ -24,7 +26,7 @@ class AuthController extends Controller
             'name'     => ['required', 'string', 'max:120'],
             'email'    => ['required', 'string', 'email', 'max:160', 'unique:users,email'],
             'phone'    => ['required', 'string', 'max:32'],
-            'password' => ['required', 'confirmed', Password::min(8)],
+            'password' => ['required', 'confirmed', Password::min(10)->mixedCase()->numbers()->uncompromised()],
         ]);
 
         $user = User::create([
@@ -32,8 +34,9 @@ class AuthController extends Controller
             'email'    => $data['email'],
             'phone'    => $data['phone'],
             'password' => Hash::make($data['password']),
-            'is_admin' => false,
         ]);
+
+        $user->forceFill(['is_admin' => false])->save();
 
         Auth::login($user);
         $request->session()->regenerate();
@@ -54,11 +57,25 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        $throttleKey = Str::transliterate(Str::lower($credentials['email']).'|'.$request->ip());
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            return back()
+                ->withErrors(['email' => 'Too many login attempts. Please try again in '.$seconds.' seconds.'])
+                ->onlyInput('email');
+        }
+
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            RateLimiter::hit($throttleKey, 60);
+
             return back()
                 ->withErrors(['email' => 'The email or password you entered is incorrect.'])
                 ->onlyInput('email');
         }
+
+        RateLimiter::clear($throttleKey);
 
         $request->session()->regenerate();
 

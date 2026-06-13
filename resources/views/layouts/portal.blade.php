@@ -850,6 +850,10 @@
       });
     })();
   </script>
+  @auth
+    @include('partials.logout-confirm-modal')
+  @endauth
+  <script src="{{ asset('js/logout-confirm.js') }}" defer></script>
   @stack('scripts')
 </body>
 </html>

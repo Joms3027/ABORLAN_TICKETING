@@ -19,6 +19,7 @@ class OpeningCeremonyController extends Controller
             'siteName' => config('app.name'),
             'homeUrl' => url('/'),
             'logoUrl' => asset('images/Logo.png'),
+            'standbyMusicUrl' => asset('audio/opening/standby-music.mp3'),
         ]);
     }
 

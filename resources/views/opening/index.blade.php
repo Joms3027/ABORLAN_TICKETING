@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ $siteName }} · Opening Ceremony</title>
   <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any" />
+  <link rel="preload" href="{{ $standbyMusicUrl }}" as="audio" type="audio/mpeg" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Source+Sans+3:wght@400;600;700&display=swap');
 
@@ -544,12 +545,138 @@
       transition: opacity .3s;
     }
     #fireworksCanvas.active { opacity: 1; }
+
+    .audio-gate {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(26, 5, 32, 0.82);
+      backdrop-filter: blur(4px);
+      cursor: pointer;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .audio-gate.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .audio-gate-inner {
+      text-align: center;
+      padding: 32px 40px;
+      border: 1px solid rgba(255, 234, 0, 0.5);
+      border-radius: 16px;
+      background: rgba(42, 10, 50, 0.95);
+      box-shadow: 0 0 40px rgba(192, 38, 211, 0.3);
+      animation: gatePulse 2.2s ease-in-out infinite;
+      max-width: 90vw;
+    }
+    @keyframes gatePulse {
+      0%, 100% { box-shadow: 0 0 40px rgba(192, 38, 211, 0.3); transform: scale(1); }
+      50% { box-shadow: 0 0 60px rgba(255, 234, 0, 0.25); transform: scale(1.02); }
+    }
+    .audio-gate-icon {
+      display: block;
+      font-size: 42px;
+      margin-bottom: 16px;
+      color: var(--gold);
+    }
+    .audio-gate-title {
+      font-size: clamp(14px, 3.5vw, 18px);
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    .audio-gate-sub {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .audio-unlock {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      background: rgba(42, 10, 50, 0.95);
+      border: 1px solid rgba(255, 234, 0, 0.45);
+      border-radius: 999px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--gold);
+      cursor: pointer;
+      box-shadow: 0 0 24px rgba(192, 38, 211, 0.25);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    .audio-unlock:hover {
+      border-color: var(--gold);
+      box-shadow: 0 0 30px rgba(255, 234, 0, 0.2);
+    }
+    .audio-unlock.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(-50%) translateY(12px);
+    }
+    .audio-unlock-icon { font-size: 16px; line-height: 1; }
+
+    .audio-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 20;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(192, 38, 211, 0.45);
+      background: rgba(42, 10, 50, 0.9);
+      color: var(--magenta-bright);
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .audio-toggle.visible { display: flex; }
+    .audio-toggle:hover { border-color: var(--gold); }
+    .audio-toggle.muted { color: rgba(255, 255, 255, 0.35); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .audio-unlock,
+      .audio-gate { display: none !important; }
+      .audio-gate-inner { animation: none; }
+    }
   </style>
 </head>
 <body>
 
 <div class="particles" id="particles"></div>
 <canvas id="fireworksCanvas"></canvas>
+
+<div class="audio-gate" id="audioGate" role="button" tabindex="0" aria-label="Tap to start ceremony music">
+  <div class="audio-gate-inner">
+    <span class="audio-gate-icon" aria-hidden="true">&#9835;</span>
+    <div class="audio-gate-title">CEREMONY MUSIC</div>
+    <div class="audio-gate-sub">TAP ANYWHERE TO START STANDBY MUSIC</div>
+  </div>
+</div>
+
+<button class="audio-unlock hidden" id="audioUnlock" type="button" aria-label="Enable ceremony audio">
+  <span class="audio-unlock-icon" aria-hidden="true">&#9835;</span>
+  TAP TO ENABLE CEREMONY AUDIO
+</button>
+<button class="audio-toggle" id="audioToggle" type="button" aria-label="Mute ceremony audio" title="Toggle sound">&#128266;</button>
 
 <div class="panel" id="mainPanel">
   <div class="corner-bl"></div>
@@ -608,7 +735,12 @@
   <button class="open-screen-reset" id="openScreenReset" type="button">RESET CEREMONY</button>
 </div>
 
+<script src="{{ asset('js/opening-ceremony-audio.js') }}"></script>
 <script>
+  OpeningCeremonyAudio.configure({
+    musicUrl: @json($standbyMusicUrl),
+  });
+
   const OPENS_AT = new Date(@json($opensAtIso));
   const COMPLETE_URL = @json(route('opening.complete'));
   const CSRF_TOKEN = @json(csrf_token());
@@ -644,6 +776,69 @@
   let scanInterval = null;
   let activePointerId = null;
   let completingScan = false;
+
+  const audioGate = document.getElementById('audioGate');
+  const audioUnlockBtn = document.getElementById('audioUnlock');
+  const audioToggleBtn = document.getElementById('audioToggle');
+  const audio = window.OpeningCeremonyAudio;
+  const audioReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let audioReady = false;
+
+  function hideAudioGate() {
+    audioGate.classList.add('hidden');
+    audioUnlockBtn.classList.add('hidden');
+  }
+
+  async function enableCeremonyAudio() {
+    if (audioReducedMotion) return;
+    if (audioReady) {
+      if (!audio.isMuted() && !audio.isBackgroundPlaying()) {
+        audio.startBackground();
+      }
+      return;
+    }
+    try {
+      await audio.unlock();
+      audioReady = true;
+      audio.startBackground();
+      hideAudioGate();
+      audioToggleBtn.classList.add('visible');
+    } catch (_) {}
+  }
+
+  function bindAudioUnlock(el) {
+    el.addEventListener('click', enableCeremonyAudio);
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        enableCeremonyAudio();
+      }
+    });
+  }
+
+  bindAudioUnlock(audioGate);
+  bindAudioUnlock(audioUnlockBtn);
+
+  ['pointerdown', 'touchstart', 'keydown'].forEach((evt) => {
+    document.addEventListener(evt, () => enableCeremonyAudio(), { once: true, passive: evt !== 'keydown' });
+  });
+
+  enableCeremonyAudio();
+
+  audioToggleBtn.addEventListener('click', () => {
+    if (!audioReady) return;
+    const nextMuted = !audio.isMuted();
+    audio.setMuted(nextMuted);
+    audioToggleBtn.classList.toggle('muted', nextMuted);
+    audioToggleBtn.textContent = nextMuted ? '\u{1F507}' : '\u{1F50A}';
+    audioToggleBtn.setAttribute('aria-label', nextMuted ? 'Unmute ceremony audio' : 'Mute ceremony audio');
+    if (!nextMuted) audio.startBackground();
+  });
+
+  setInterval(() => {
+    if (!audioReady || audio.isMuted()) return;
+    if (!audio.isBackgroundPlaying()) audio.startBackground();
+  }, 4000);
 
   function checkOpeningTime() {
     if (openingUnlocked || OPENS_AT - Date.now() > 0) {
