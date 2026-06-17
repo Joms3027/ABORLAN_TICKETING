@@ -7,6 +7,8 @@ use App\Models\Booking;
 use App\Models\User;
 use App\Services\BookingAvailability;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -15,15 +17,26 @@ class DashboardController extends Controller
     {
         $today = Carbon::today();
 
-        $stats = [
-            'pending'        => Booking::where('status', Booking::STATUS_PENDING)->count(),
-            'approved'       => Booking::where('status', Booking::STATUS_APPROVED)->count(),
-            'today_active'   => Booking::active()->forDate($today)->sum('party_size'),
-            'total_users'    => User::where('is_admin', false)->count(),
-            'total_bookings' => Booking::count(),
-            'default_quota'       => BookingAvailability::defaultQuota(),
-            'default_max_bookings'  => BookingAvailability::defaultMaxBookings(),
-        ];
+        $stats = Cache::remember(
+            'dashboard:booking_stats',
+            now()->addSeconds(30),
+            function () use ($today) {
+                $statusCounts = Booking::query()
+                    ->select('status', DB::raw('COUNT(*) as aggregate'))
+                    ->groupBy('status')
+                    ->pluck('aggregate', 'status');
+
+                return [
+                    'pending'        => (int) ($statusCounts[Booking::STATUS_PENDING] ?? 0),
+                    'approved'       => (int) ($statusCounts[Booking::STATUS_APPROVED] ?? 0),
+                    'today_active'   => (int) Booking::active()->forDate($today)->sum('party_size'),
+                    'total_users'    => User::where('is_admin', false)->count(),
+                    'total_bookings' => (int) $statusCounts->sum(),
+                    'default_quota'      => BookingAvailability::defaultQuota(),
+                    'default_max_bookings' => BookingAvailability::defaultMaxBookings(),
+                ];
+            }
+        );
 
         $recentBookings = Booking::with('user')
             ->latest('id')

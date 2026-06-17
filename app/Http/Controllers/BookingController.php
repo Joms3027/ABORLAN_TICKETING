@@ -25,31 +25,67 @@ class BookingController extends Controller
 
     public function index(Request $request): View
     {
-        $bookings = $request->user()
-            ->bookings()
+        $user = $request->user();
+        $today = Carbon::today()->toDateString();
+
+        $statsRow = DB::table('bookings')
+            ->leftJoin('booking_feedback', 'bookings.id', '=', 'booking_feedback.booking_id')
+            ->where('bookings.user_id', $user->id)
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN bookings.status = ? THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN bookings.status = ? AND bookings.hike_date > ? THEN 1 ELSE 0 END) as approved_upcoming,
+                SUM(CASE
+                    WHEN bookings.status IN (?, ?, ?)
+                        OR (bookings.status = ? AND bookings.hike_date < ?)
+                    THEN 1 ELSE 0 END) as past,
+                SUM(CASE
+                    WHEN booking_feedback.id IS NULL
+                        AND (
+                            bookings.status = ?
+                            OR (bookings.status = ? AND bookings.hike_date <= ?)
+                        )
+                    THEN 1 ELSE 0 END) as feedback_available
+            ", [
+                Booking::STATUS_PENDING,
+                Booking::STATUS_APPROVED,
+                $today,
+                Booking::STATUS_COMPLETED,
+                Booking::STATUS_REJECTED,
+                Booking::STATUS_CANCELLED,
+                Booking::STATUS_APPROVED,
+                $today,
+                Booking::STATUS_COMPLETED,
+                Booking::STATUS_APPROVED,
+                $today,
+            ])
+            ->first();
+
+        $stats = [
+            'total'              => (int) ($statsRow->total ?? 0),
+            'pending'            => (int) ($statsRow->pending ?? 0),
+            'approved_upcoming'  => (int) ($statsRow->approved_upcoming ?? 0),
+            'past'               => (int) ($statsRow->past ?? 0),
+            'feedback_available' => (int) ($statsRow->feedback_available ?? 0),
+        ];
+
+        $nextHike = $user->bookings()
+            ->where('status', Booking::STATUS_APPROVED)
+            ->whereDate('hike_date', '>', $today)
+            ->orderBy('hike_date')
+            ->first();
+
+        $bookings = $user->bookings()
             ->with('feedback')
             ->orderByDesc('hike_date')
             ->orderByDesc('id')
-            ->get();
-
-        $nextHike = $bookings
-            ->where('status', Booking::STATUS_APPROVED)
-            ->filter(fn (Booking $b) => $b->hike_date?->isFuture())
-            ->sortBy('hike_date')
-            ->first();
+            ->paginate(10)
+            ->withQueryString();
 
         return view('bookings.index', [
             'bookings'  => $bookings,
             'nextHike'  => $nextHike,
-            'stats'     => [
-                'total'              => $bookings->count(),
-                'pending'            => $bookings->where('status', Booking::STATUS_PENDING)->count(),
-                'approved_upcoming'  => $bookings
-                    ->where('status', Booking::STATUS_APPROVED)
-                    ->filter(fn (Booking $b) => $b->hike_date?->isFuture())
-                    ->count(),
-                'feedback_available' => $bookings->filter(fn (Booking $b) => $b->canReceiveFeedback())->count(),
-            ],
+            'stats'     => $stats,
         ]);
     }
 

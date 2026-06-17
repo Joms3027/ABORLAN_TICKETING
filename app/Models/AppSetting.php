@@ -15,9 +15,15 @@ class AppSetting extends Model
 
     public static function get(string $key, mixed $default = null): mixed
     {
-        $row = static::query()->find($key);
+        return Cache::remember(
+            'app_setting:'.$key,
+            now()->addHour(),
+            function () use ($key, $default) {
+                $row = static::query()->find($key);
 
-        return $row?->value ?? $default;
+                return $row?->value ?? $default;
+            }
+        );
     }
 
     public static function put(string $key, mixed $value): void

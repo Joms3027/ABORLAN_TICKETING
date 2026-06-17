@@ -90,6 +90,7 @@ class QuotaController extends Controller
 
         AppSetting::put(BookingAvailability::DEFAULT_QUOTA_KEY, (int) $data['default_quota']);
         AppSetting::put(BookingAvailability::DEFAULT_MAX_BOOKINGS_KEY, (int) $data['default_max_bookings']);
+        BookingAvailability::clearQuotaCache();
 
         $capMsg = (int) $data['default_max_bookings'] > 0
             ? (int) $data['default_max_bookings'].' bookings per day.'
@@ -125,6 +126,8 @@ class QuotaController extends Controller
                 'note'         => $data['note'] ?? null,
             ]
         );
+
+        BookingAvailability::clearDateCache(Carbon::parse($data['quota_date'])->toDateString());
 
         return redirect()
             ->route('admin.quotas.index')

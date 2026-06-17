@@ -8,6 +8,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  @auth
+    <link rel="prefetch" href="{{ route('bookings.create') }}" as="document" />
+    <link rel="prefetch" href="{{ route('bookings.index') }}" as="document" />
+  @endauth
+  <link rel="prefetch" href="{{ route('atup.overview') }}" as="document" />
   <style>
     :root {
       --navy: #2a0a32;

@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\DailyQuota;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class BookingAvailability
 {
@@ -14,6 +15,10 @@ class BookingAvailability
 
     /** App setting: max active booking groups per day; 0 = no separate cap (legacy behavior). */
     public const DEFAULT_MAX_BOOKINGS_KEY = 'default_max_bookings_per_day';
+
+    private const BOOKED_CACHE_TTL_SECONDS = 60;
+
+    private const QUOTA_CACHE_TTL_SECONDS = 300;
 
     public static function defaultQuota(): int
     {
@@ -35,44 +40,66 @@ class BookingAvailability
      */
     public static function maxBookingsForDate(CarbonInterface|string $date): ?int
     {
-        $date = $date instanceof CarbonInterface ? $date : Carbon::parse($date);
-        $row  = DailyQuota::query()->whereDate('quota_date', $date->toDateString())->first();
+        $dateKey = self::dateKey($date);
 
-        if ($row && $row->max_bookings !== null) {
-            return max(0, (int) $row->max_bookings);
-        }
+        return Cache::remember(
+            self::quotaCacheKey($dateKey, 'max_bookings'),
+            now()->addSeconds(self::QUOTA_CACHE_TTL_SECONDS),
+            function () use ($dateKey) {
+                $row = DailyQuota::query()->whereDate('quota_date', $dateKey)->first();
 
-        $def = self::defaultMaxBookings();
+                if ($row && $row->max_bookings !== null) {
+                    return max(0, (int) $row->max_bookings);
+                }
 
-        return $def > 0 ? $def : null;
+                $def = self::defaultMaxBookings();
+
+                return $def > 0 ? $def : null;
+            }
+        );
     }
 
     public static function quotaForDate(CarbonInterface|string $date): int
     {
-        $date = $date instanceof CarbonInterface ? $date : Carbon::parse($date);
-        $row  = DailyQuota::query()->whereDate('quota_date', $date->toDateString())->first();
+        $dateKey = self::dateKey($date);
 
-        return $row ? (int) $row->slots : self::defaultQuota();
+        return Cache::remember(
+            self::quotaCacheKey($dateKey, 'slots'),
+            now()->addSeconds(self::QUOTA_CACHE_TTL_SECONDS),
+            function () use ($dateKey) {
+                $row = DailyQuota::query()->whereDate('quota_date', $dateKey)->first();
+
+                return $row ? (int) $row->slots : self::defaultQuota();
+            }
+        );
     }
 
     public static function bookedSlotsForDate(CarbonInterface|string $date): int
     {
-        $date = $date instanceof CarbonInterface ? $date : Carbon::parse($date);
+        $dateKey = self::dateKey($date);
 
-        return (int) Booking::query()
-            ->forDate($date)
-            ->active()
-            ->sum('party_size');
+        return Cache::remember(
+            self::bookedCacheKey($dateKey, 'slots'),
+            now()->addSeconds(self::BOOKED_CACHE_TTL_SECONDS),
+            fn () => (int) Booking::query()
+                ->forDate($dateKey)
+                ->active()
+                ->sum('party_size')
+        );
     }
 
     public static function bookedBookingsCountForDate(CarbonInterface|string $date): int
     {
-        $date = $date instanceof CarbonInterface ? $date : Carbon::parse($date);
+        $dateKey = self::dateKey($date);
 
-        return (int) Booking::query()
-            ->forDate($date)
-            ->active()
-            ->count();
+        return Cache::remember(
+            self::bookedCacheKey($dateKey, 'count'),
+            now()->addSeconds(self::BOOKED_CACHE_TTL_SECONDS),
+            fn () => (int) Booking::query()
+                ->forDate($dateKey)
+                ->active()
+                ->count()
+        );
     }
 
     public static function remainingForDate(CarbonInterface|string $date): int
@@ -106,6 +133,32 @@ class BookingAvailability
         return $remBookings === null || $remBookings > 0;
     }
 
+    public static function clearDateCache(string $date): void
+    {
+        $dateKey = self::dateKey($date);
+
+        Cache::forget(self::quotaCacheKey($dateKey, 'slots'));
+        Cache::forget(self::quotaCacheKey($dateKey, 'max_bookings'));
+        Cache::forget(self::bookedCacheKey($dateKey, 'slots'));
+        Cache::forget(self::bookedCacheKey($dateKey, 'count'));
+        self::clearUpcomingCache();
+    }
+
+    public static function clearQuotaCache(): void
+    {
+        Cache::forget('booking_avail:defaults');
+        self::clearUpcomingCache();
+    }
+
+    public static function clearUpcomingCache(): void
+    {
+        $today = Carbon::today()->toDateString();
+
+        foreach ([7, 14, 30] as $days) {
+            Cache::forget(self::upcomingCacheKey($days, $today));
+        }
+    }
+
     /**
      * @return array<int, array{
      *   date:string,
@@ -125,7 +178,21 @@ class BookingAvailability
     public static function upcomingAvailability(int $days = 14): array
     {
         $start = Carbon::today();
-        $end   = $start->copy()->addDays($days - 1);
+        $cacheKey = self::upcomingCacheKey($days, $start->toDateString());
+
+        return Cache::remember(
+            $cacheKey,
+            now()->addSeconds(self::BOOKED_CACHE_TTL_SECONDS),
+            fn () => self::buildUpcomingAvailability($days, $start)
+        );
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private static function buildUpcomingAvailability(int $days, Carbon $start): array
+    {
+        $end = $start->copy()->addDays($days - 1);
 
         $customQuotas = DailyQuota::query()
             ->whereBetween('quota_date', [$start->toDateString(), $end->toDateString()])
@@ -195,5 +262,27 @@ class BookingAvailability
         }
 
         return $rows;
+    }
+
+    private static function dateKey(CarbonInterface|string $date): string
+    {
+        return $date instanceof CarbonInterface
+            ? $date->toDateString()
+            : Carbon::parse($date)->toDateString();
+    }
+
+    private static function quotaCacheKey(string $date, string $suffix): string
+    {
+        return "booking_avail:quota:{$date}:{$suffix}";
+    }
+
+    private static function bookedCacheKey(string $date, string $suffix): string
+    {
+        return "booking_avail:booked:{$date}:{$suffix}";
+    }
+
+    private static function upcomingCacheKey(int $days, string $startDate): string
+    {
+        return "booking_avail:upcoming:{$startDate}:{$days}";
     }
 }

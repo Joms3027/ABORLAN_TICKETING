@@ -388,7 +388,7 @@
       <div class="panel-head">
         <h2>All bookings</h2>
         @if ($bookings->isNotEmpty())
-          <span class="muted">{{ $bookings->count() }} permit{{ $bookings->count() === 1 ? '' : 's' }}</span>
+          <span class="muted">{{ $stats['total'] }} permit{{ $stats['total'] === 1 ? '' : 's' }}</span>
         @endif
       </div>
 
@@ -420,7 +420,7 @@
       @else
         <div class="booking-filters" role="tablist" aria-label="Filter bookings">
           <button type="button" class="is-active" data-filter="all" role="tab" aria-selected="true">
-            All<span class="count">{{ $bookings->count() }}</span>
+            All<span class="count">{{ $stats['total'] }}</span>
           </button>
           @if ($stats['pending'] > 0)
             <button type="button" data-filter="pending" role="tab" aria-selected="false">
@@ -432,12 +432,9 @@
               Upcoming<span class="count">{{ $stats['approved_upcoming'] }}</span>
             </button>
           @endif
-          @php
-            $pastCount = $bookings->filter(fn ($b) => in_array($b->status, ['completed', 'rejected', 'cancelled'], true) || ($b->status === 'approved' && $b->hike_date?->lt($today)))->count();
-          @endphp
-          @if ($pastCount > 0)
+          @if ($stats['past'] > 0)
             <button type="button" data-filter="past" role="tab" aria-selected="false">
-              Past<span class="count">{{ $pastCount }}</span>
+              Past<span class="count">{{ $stats['past'] }}</span>
             </button>
           @endif
           @if ($stats['feedback_available'] > 0)
@@ -513,6 +510,12 @@
             </article>
           @endforeach
         </div>
+
+        @if ($bookings->hasPages())
+          <div class="bookings-pagination" style="margin-top:1.25rem;display:flex;justify-content:center;">
+            {{ $bookings->links() }}
+          </div>
+        @endif
 
         <p class="bookings-no-results" id="bookingsNoResults" hidden>
           No bookings match this filter. <button type="button" class="btn btn-secondary btn-sm" id="clearBookingFilter" style="margin-top:0.75rem;">Show all</button>

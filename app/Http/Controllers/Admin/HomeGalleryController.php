@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AppSetting;
 use App\Models\HomeGallerySlide;
+use App\Services\HomePageCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -94,6 +95,7 @@ class HomeGalleryController extends Controller
 
         if ($request->boolean('use_default_hero')) {
             AppSetting::put(HomeGallerySlide::APP_SETTING_HERO_IMAGE, '');
+            HomePageCache::clear();
 
             return redirect()
                 ->route('admin.homePage.index')
@@ -104,6 +106,7 @@ class HomeGalleryController extends Controller
             $oldHero = AppSetting::get(HomeGallerySlide::APP_SETTING_HERO_IMAGE);
             $path = $request->file('hero_image')->store('home-gallery', 'public');
             AppSetting::put(HomeGallerySlide::APP_SETTING_HERO_IMAGE, $path);
+            HomePageCache::clear();
             if (is_string($oldHero) && str_starts_with($oldHero, 'home-gallery/')) {
                 Storage::disk('public')->delete($oldHero);
             }
