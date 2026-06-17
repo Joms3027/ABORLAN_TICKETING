@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Models\BookingFeedback;
 use App\Services\BookingAvailability;
+use App\Services\BookingStatusService;
+use App\Services\NotificationService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,6 +18,11 @@ use Illuminate\View\View;
 
 class BookingController extends Controller
 {
+    public function __construct(
+        protected NotificationService $notifications,
+        protected BookingStatusService $bookingStatus,
+    ) {}
+
     public function index(Request $request): View
     {
         $bookings = $request->user()
@@ -196,6 +203,15 @@ class BookingController extends Controller
             return back()->withInput()->withErrors(['hike_date' => $e->getMessage()]);
         }
 
+        $this->bookingStatus->record($booking, null, Booking::STATUS_PENDING, $request->user()->id);
+
+        try {
+            $this->notifications->sendBookingSubmitted($booking);
+            $this->notifications->notifyAdminsBookingSubmitted($booking);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         return redirect()
             ->route('bookings.show', $booking)
             ->with('status', 'Your hiking permit booking has been submitted. Reference: '.$booking->reference_code);
@@ -260,11 +276,26 @@ class BookingController extends Controller
             return back()->withErrors(['booking' => 'This booking can no longer be cancelled.']);
         }
 
+        $previousStatus = $booking->status;
+
         $booking->update([
             'status'         => Booking::STATUS_CANCELLED,
             'decided_at'     => now(),
             'tour_guide_id'  => null,
         ]);
+
+        $this->bookingStatus->record(
+            $booking,
+            $previousStatus,
+            Booking::STATUS_CANCELLED,
+            $request->user()->id,
+        );
+
+        try {
+            $this->notifications->notifyAdminsBookingCancelled($booking->fresh(['user']));
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return redirect()
             ->route('bookings.index')

@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\EmailOtp;
 use App\Models\User;
+use App\Services\AuditLogService;
+use App\Services\EmailOtpService;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,11 +19,20 @@ use Illuminate\View\View;
 
 class AuthController extends Controller
 {
+    public function __construct(
+        protected EmailOtpService $otpService,
+        protected NotificationService $notifications,
+        protected AuditLogService $auditLog,
+    ) {}
+
     public function showRegister(): View
     {
         return view('auth.register');
     }
 
+    /**
+     * Register a new user and initiate email OTP verification before granting access.
+     */
     public function register(Request $request): RedirectResponse
     {
         $data = $request->validate([
@@ -38,11 +51,30 @@ class AuthController extends Controller
 
         $user->forceFill(['is_admin' => false])->save();
 
-        Auth::login($user);
-        $request->session()->regenerate();
+        $result = $this->otpService->generateAndSend(
+            $user->email,
+            EmailOtp::PURPOSE_REGISTER,
+            $request->ip() ?? '0.0.0.0',
+        );
 
-        return redirect()->route('atup.overview')
-            ->with('status', 'Welcome, '.$user->name.'! Your account is ready. You can now book a hiking permit.');
+        if (! $result['success']) {
+            $user->delete();
+
+            return back()
+                ->withErrors(['email' => $result['message']])
+                ->withInput();
+        }
+
+        $request->session()->put('otp_pending', [
+            'email' => strtolower(trim($user->email)),
+            'purpose' => EmailOtp::PURPOSE_REGISTER,
+            'user_id' => $user->id,
+            'remember' => false,
+            'session_token' => $result['otp']->session_token,
+        ]);
+
+        return redirect()->route('otp.verify.show')
+            ->with('status', 'We sent a verification code to your email. Enter it below to complete registration.');
     }
 
     public function showLogin(): View
@@ -50,6 +82,9 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
+    /**
+     * Validate credentials, then require email OTP verification before signing in.
+     */
     public function login(Request $request): RedirectResponse
     {
         $credentials = $request->validate([
@@ -62,12 +97,26 @@ class AuthController extends Controller
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $seconds = RateLimiter::availableIn($throttleKey);
 
+            $this->auditLog->logSuspiciousLogin($credentials['email'], $request->ip() ?? '0.0.0.0', $seconds);
+
+            try {
+                $this->notifications->notifyAdminsSuspiciousLogin(
+                    $credentials['email'],
+                    $request->ip() ?? '0.0.0.0',
+                    $seconds,
+                );
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
             return back()
                 ->withErrors(['email' => 'Too many login attempts. Please try again in '.$seconds.' seconds.'])
                 ->onlyInput('email');
         }
 
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+        $user = User::query()->where('email', strtolower(trim($credentials['email'])))->first();
+
+        if ($user === null || ! Hash::check($credentials['password'], $user->password)) {
             RateLimiter::hit($throttleKey, 60);
 
             return back()
@@ -77,14 +126,28 @@ class AuthController extends Controller
 
         RateLimiter::clear($throttleKey);
 
-        $request->session()->regenerate();
+        $result = $this->otpService->generateAndSend(
+            $user->email,
+            EmailOtp::PURPOSE_LOGIN,
+            $request->ip() ?? '0.0.0.0',
+        );
 
-        $user = Auth::user();
-        if ($user && $user->is_admin) {
-            return redirect()->intended(route('admin.dashboard'));
+        if (! $result['success']) {
+            return back()
+                ->withErrors(['email' => $result['message']])
+                ->onlyInput('email');
         }
 
-        return redirect()->intended(route('bookings.index'));
+        $request->session()->put('otp_pending', [
+            'email' => strtolower(trim($user->email)),
+            'purpose' => EmailOtp::PURPOSE_LOGIN,
+            'user_id' => $user->id,
+            'remember' => $request->boolean('remember'),
+            'session_token' => $result['otp']->session_token,
+        ]);
+
+        return redirect()->route('otp.verify.show')
+            ->with('status', 'We sent a verification code to your email. Enter it to complete sign-in.');
     }
 
     public function logout(Request $request): RedirectResponse

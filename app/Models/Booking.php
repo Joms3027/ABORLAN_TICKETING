@@ -61,6 +61,11 @@ class Booking extends Model
         return $this->hasOne(BookingFeedback::class);
     }
 
+    public function statusHistory(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(BookingStatusHistory::class);
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->whereIn('status', [self::STATUS_PENDING, self::STATUS_APPROVED]);

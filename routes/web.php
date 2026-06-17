@@ -9,13 +9,10 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AtupAtupController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\OpeningCeremonyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
-Route::get('/opening', [OpeningCeremonyController::class, 'index'])->name('opening.index');
-Route::post('/opening/complete', [OpeningCeremonyController::class, 'complete'])->name('opening.complete');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -48,6 +45,13 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:20,1');
+
+    Route::middleware('otp.pending')->prefix('otp')->name('otp.')->group(function () {
+        Route::get('/verify', [OtpController::class, 'showVerify'])->name('verify.show');
+        Route::post('/verify', [OtpController::class, 'verify'])->middleware('throttle:15,1')->name('verify');
+        Route::post('/resend', [OtpController::class, 'resend'])->middleware('throttle:6,1')->name('resend');
+        Route::post('/cancel', [OtpController::class, 'cancel'])->name('cancel');
+    });
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])
@@ -94,4 +98,7 @@ Route::prefix('admin')
         Route::patch('/home-page/gallery/{slide}', [AdminHomeGalleryController::class, 'update'])->name('homePage.gallery.update');
         Route::delete('/home-page/gallery/{slide}', [AdminHomeGalleryController::class, 'destroy'])->name('homePage.gallery.destroy');
         Route::post('/home-page/hero', [AdminHomeGalleryController::class, 'updateHero'])->name('homePage.hero');
+
+        Route::get('/notifications/emails', [\App\Http\Controllers\Admin\NotificationController::class, 'emailHistory'])->name('notifications.emails');
+        Route::get('/notifications/audit-logs', [\App\Http\Controllers\Admin\NotificationController::class, 'auditLogs'])->name('notifications.audit');
     });

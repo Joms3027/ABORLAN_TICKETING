@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Services\BookingAvailability;
+use App\Services\BookingStatusService;
+use App\Services\NotificationService;
 use App\Services\TourGuideAssignment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,6 +14,11 @@ use Illuminate\View\View;
 
 class BookingController extends Controller
 {
+    public function __construct(
+        protected NotificationService $notifications,
+        protected BookingStatusService $bookingStatus,
+    ) {}
+
     public function index(Request $request): View
     {
         $query = Booking::query()->with(['user', 'tourGuide'])->latest('id');
@@ -68,7 +75,8 @@ class BookingController extends Controller
             'admin_notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $wasApproved = $booking->status === Booking::STATUS_APPROVED;
+        $previousStatus = $booking->status;
+        $wasApproved = $previousStatus === Booking::STATUS_APPROVED;
 
         $updates = [
             'status'      => $data['status'],
@@ -82,6 +90,16 @@ class BookingController extends Controller
 
         $booking->update($updates);
 
+        if ($previousStatus !== $data['status']) {
+            $this->bookingStatus->record(
+                $booking,
+                $previousStatus,
+                $data['status'],
+                $request->user()?->id,
+                $data['admin_notes'] ?? null,
+            );
+        }
+
         $message = 'Booking '.$booking->reference_code.' updated to '.$booking->statusLabel().'.';
 
         if ($data['status'] === Booking::STATUS_APPROVED) {
@@ -91,6 +109,20 @@ class BookingController extends Controller
                 $message .= ' Assigned tour guide: '.$guide->name.'.';
             } elseif (! $wasApproved || ! $booking->tour_guide_id) {
                 $message .= ' No tour guide was available for this hike date — add guides or free up capacity in Tour guides.';
+            }
+        }
+
+        if ($previousStatus !== $data['status']) {
+            $booking->load(['user', 'tourGuide']);
+
+            try {
+                if ($data['status'] === Booking::STATUS_APPROVED) {
+                    $this->notifications->sendBookingApproved($booking);
+                } elseif ($data['status'] === Booking::STATUS_REJECTED) {
+                    $this->notifications->sendBookingRejected($booking);
+                }
+            } catch (\Throwable $e) {
+                report($e);
             }
         }
 
