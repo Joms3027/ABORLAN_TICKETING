@@ -108,15 +108,20 @@
   }
   .health-check-item {
     display: flex;
-    gap: 0.6rem;
+    gap: 0.65rem;
     align-items: flex-start;
+    min-height: 44px;
+    padding: 0.35rem 0;
     cursor: pointer;
     font-size: 0.92rem;
     line-height: 1.45;
   }
   .health-check-item input {
-    margin-top: 0.2rem;
+    margin-top: 0.15rem;
     flex-shrink: 0;
+    width: 1.15rem;
+    height: 1.15rem;
+    accent-color: var(--teal);
   }
   .health-waiver-block {
     margin-top: 1.15rem;
@@ -143,6 +148,7 @@
     gap: 0.5rem;
     justify-content: flex-end;
     padding: 0.85rem 1.25rem;
+    padding-bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
     border-top: 1px solid var(--border);
     background: #fff;
   }
@@ -151,8 +157,16 @@
     .health-modal { padding: 0; align-items: stretch; }
     .health-modal-dialog {
       width: 100%;
-      max-height: 100vh;
+      max-height: 100dvh;
       border-radius: 0;
+    }
+    .health-modal-footer {
+      flex-direction: column;
+    }
+    .health-modal-footer .btn {
+      width: 100%;
+      min-height: 44px;
+      justify-content: center;
     }
   }
 </style>

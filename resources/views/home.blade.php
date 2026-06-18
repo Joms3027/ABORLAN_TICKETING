@@ -42,6 +42,8 @@
 
     html {
       scroll-behavior: smooth;
+      overflow-x: clip;
+      -webkit-text-size-adjust: 100%;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -94,6 +96,13 @@
       line-height: 1.65;
       font-size: 1.0625rem;
       -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
+      min-height: 100dvh;
+    }
+
+    body.nav-locked {
+      overflow: hidden;
+      touch-action: none;
     }
 
     .container {
@@ -1725,7 +1734,13 @@
 
     @media (max-width: 900px) {
       .back-to-top {
-        bottom: 4.5rem;
+        bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+      }
+
+      .fab-book {
+        bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+        right: calc(1.25rem + env(safe-area-inset-right, 0px));
+        min-height: 44px;
       }
     }
 
@@ -1865,6 +1880,9 @@
 
       .nav-links a {
         text-align: left;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
         padding: 0.9rem 1.15rem;
         font-size: 0.9375rem;
         font-weight: 600;
@@ -2525,13 +2543,24 @@
         cluster.classList.toggle("is-open", open);
         btn.setAttribute("aria-expanded", open ? "true" : "false");
         btn.querySelector(".sr-only").textContent = open ? "Close menu" : "Open menu";
+        if (window.matchMedia("(max-width: 900px)").matches) {
+          document.body.classList.toggle("nav-locked", open);
+        } else {
+          document.body.classList.remove("nav-locked");
+        }
       }
 
       btn.addEventListener("click", function () {
         setNavOpen(!cluster.classList.contains("is-open"));
       });
 
-      cluster.querySelectorAll('a[href^="#"]').forEach(function (a) {
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && cluster.classList.contains("is-open")) {
+          setNavOpen(false);
+        }
+      });
+
+      cluster.querySelectorAll("a").forEach(function (a) {
         a.addEventListener("click", function () {
           if (window.matchMedia("(max-width: 900px)").matches) {
             setNavOpen(false);
@@ -2542,6 +2571,7 @@
       window.addEventListener("resize", function () {
         if (window.innerWidth > 900) {
           setNavOpen(false);
+          document.body.classList.remove("nav-locked");
         }
       });
 

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Mail\OtpVerification;
+use App\Models\AuditLog;
 use App\Models\EmailOtp;
 use App\Models\User;
 use App\Services\EmailOtpService;
@@ -46,6 +47,7 @@ class EmailOtpAuthenticationTest extends TestCase
 
         $user = User::factory()->create([
             'password' => Hash::make('SecurePass1'),
+            'is_admin' => false,
         ]);
 
         $response = $this->post('/login', [
@@ -57,6 +59,36 @@ class EmailOtpAuthenticationTest extends TestCase
         $this->assertGuest();
         Mail::assertSent(OtpVerification::class, fn ($mail) => $mail->hasTo($user->email));
         $this->assertNotNull(session('otp_pending.session_token'));
+    }
+
+    public function test_admin_login_skips_otp_and_grants_access_immediately(): void
+    {
+        Mail::fake();
+
+        $admin = User::factory()->create([
+            'password' => Hash::make('SecurePass1'),
+            'is_admin' => true,
+        ]);
+
+        $response = $this->post('/login', [
+            'email' => $admin->email,
+            'password' => 'SecurePass1',
+        ]);
+
+        $response->assertRedirect(route('admin.dashboard'));
+        $this->assertAuthenticatedAs($admin);
+        $this->assertNull(session('otp_pending'));
+        Mail::assertNothingSent();
+
+        $this->assertDatabaseHas('audit_logs', [
+            'event' => 'admin_login',
+            'category' => AuditLog::CATEGORY_AUTH,
+            'user_id' => $admin->id,
+            'email' => strtolower($admin->email),
+        ]);
+
+        $audit = AuditLog::query()->where('event', 'admin_login')->first();
+        $this->assertTrue($audit->metadata['otp_bypassed'] ?? false);
     }
 
     public function test_correct_otp_completes_login(): void

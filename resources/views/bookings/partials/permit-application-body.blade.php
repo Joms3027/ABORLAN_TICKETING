@@ -37,9 +37,10 @@
   </div>
 
   @if ($booking->members)
-    <div style="margin-top:1.1rem; overflow-x:auto;">
+    <div style="margin-top:1.1rem;">
       <div class="hint" style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-bottom:0.4rem;">Visitor roster</div>
-      <table style="width:100%; border-collapse:collapse; font-size:0.92rem;">
+      <div class="roster-table-wrap">
+      <table class="roster-table" style="width:100%; border-collapse:collapse; font-size:0.92rem;">
         <thead>
           <tr style="border-bottom:2px solid var(--border); text-align:left;">
             <th style="padding:0.45rem 0.5rem;">#</th>
@@ -53,16 +54,17 @@
         <tbody>
           @foreach ($booking->members as $i => $member)
             <tr style="border-bottom:1px solid var(--border);">
-              <td style="padding:0.45rem 0.5rem;">{{ $i + 1 }}</td>
-              <td style="padding:0.45rem 0.5rem;">{{ $member['name'] ?? '—' }}</td>
-              <td style="padding:0.45rem 0.5rem;">{{ $member['sex'] ?? '—' }}</td>
-              <td style="padding:0.45rem 0.5rem;">{{ $member['address'] ?? '—' }}</td>
-              <td style="padding:0.45rem 0.5rem;">{{ $member['emergency_contact'] ?? '—' }}</td>
-              <td style="padding:0.45rem 0.5rem;">{{ $member['body_marks'] ?? '—' }}</td>
+              <td class="roster-num" style="padding:0.45rem 0.5rem;">Visitor {{ $i + 1 }}</td>
+              <td data-label="Name" style="padding:0.45rem 0.5rem;">{{ $member['name'] ?? '—' }}</td>
+              <td data-label="Sex" style="padding:0.45rem 0.5rem;">{{ $member['sex'] ?? '—' }}</td>
+              <td data-label="Address" style="padding:0.45rem 0.5rem;">{{ $member['address'] ?? '—' }}</td>
+              <td data-label="Emergency contact" style="padding:0.45rem 0.5rem;">{{ $member['emergency_contact'] ?? '—' }}</td>
+              <td data-label="Body ID / marks" style="padding:0.45rem 0.5rem;">{{ $member['body_marks'] ?? '—' }}</td>
             </tr>
           @endforeach
         </tbody>
       </table>
+      </div>
     </div>
   @endif
 

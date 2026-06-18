@@ -87,6 +87,28 @@ class AuditLogService
     }
 
     /**
+     * Log a successful administrator sign-in (OTP bypass or standard flow).
+     *
+     * @param  array<string, mixed>  $metadata
+     */
+    public function logAdminLogin(
+        int $userId,
+        string $email,
+        string $ipAddress,
+        bool $otpBypassed = false,
+        array $metadata = [],
+    ): AuditLog {
+        return $this->log(
+            'admin_login',
+            AuditLog::CATEGORY_AUTH,
+            userId: $userId,
+            email: $email,
+            ipAddress: $ipAddress,
+            metadata: array_merge(['otp_bypassed' => $otpBypassed], $metadata),
+        );
+    }
+
+    /**
      * Log suspicious login activity and trigger admin alerts.
      */
     public function logSuspiciousLogin(string $email, string $ipAddress, int $retryAfterSeconds): AuditLog

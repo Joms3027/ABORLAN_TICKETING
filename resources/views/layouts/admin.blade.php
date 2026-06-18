@@ -38,6 +38,15 @@
       --danger: #dc2626;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { overflow-x: clip; -webkit-text-size-adjust: 100%; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
     body.admin-body {
       font-family: var(--font);
       color: var(--text);
@@ -46,8 +55,10 @@
       font-size: 1rem;
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
+      min-height: 100dvh;
       overflow-x: clip;
     }
+    body.admin-body.sidebar-locked { overflow: hidden; touch-action: none; }
     a { color: var(--admin-accent-hover); text-decoration: none; }
     a:hover { color: var(--navy); }
 
@@ -130,6 +141,7 @@
       display: flex;
       align-items: center;
       gap: 0.65rem;
+      min-height: 44px;
       padding: 0.6rem 0.75rem;
       border-radius: var(--radius-sm);
       font-weight: 600;
@@ -170,6 +182,7 @@
       align-items: center;
       gap: 0.5rem;
       width: 100%;
+      min-height: 44px;
       padding: 0.55rem 0.75rem;
       border-radius: var(--radius-sm);
       font-size: 0.85rem;
@@ -215,6 +228,7 @@
       flex-wrap: wrap;
       min-height: var(--topbar-h);
       padding: 0.75rem clamp(1rem, 3vw, 1.75rem);
+      padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       box-shadow: var(--shadow-sm);
@@ -232,8 +246,10 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 2.5rem;
-      height: 2.5rem;
+      width: 2.75rem;
+      height: 2.75rem;
+      min-width: 44px;
+      min-height: 44px;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       background: #fff;
@@ -731,6 +747,11 @@
       .admin-topbar-actions .btn { flex: 1; justify-content: center; }
       .admin-user-chip { width: 100%; text-align: center; }
       .quick-actions .btn { flex: 1 1 100%; justify-content: center; }
+      .breadcrumb { font-size: 0.78rem; }
+    }
+
+    @media (max-width: 480px) {
+      .admin-topbar-title h1 { font-size: 1.05rem; }
     }
   </style>
   @stack('head')
@@ -796,6 +817,10 @@
           <div class="alert alert-success" role="status">{{ session('status') }}</div>
         @endif
 
+        @if (session('warning'))
+          <div class="alert alert-error" role="alert">{{ session('warning') }}</div>
+        @endif
+
         @if ($errors->any())
           <div class="alert alert-error" role="alert">
             <strong>Please fix the following:</strong>
@@ -817,16 +842,34 @@
       var app = document.getElementById('adminApp');
       var toggle = document.getElementById('menuToggle');
       var backdrop = document.getElementById('sidebarBackdrop');
+      var body = document.body;
       function setOpen(open) {
         app.classList.toggle('sidebar-open', open);
-        if (toggle) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (toggle) {
+          toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+          toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+        }
+        if (window.matchMedia('(max-width: 959px)').matches) {
+          body.classList.toggle('sidebar-locked', open);
+        } else {
+          body.classList.remove('sidebar-locked');
+        }
       }
       if (toggle) toggle.addEventListener('click', function () { setOpen(!app.classList.contains('sidebar-open')); });
       if (backdrop) backdrop.addEventListener('click', function () { setOpen(false); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && app.classList.contains('sidebar-open')) setOpen(false);
+      });
       document.querySelectorAll('.admin-nav a').forEach(function (link) {
         link.addEventListener('click', function () {
           if (window.matchMedia('(max-width: 959px)').matches) setOpen(false);
         });
+      });
+      window.addEventListener('resize', function () {
+        if (window.matchMedia('(min-width: 960px)').matches) {
+          setOpen(false);
+          body.classList.remove('sidebar-locked');
+        }
       });
     })();
   </script>

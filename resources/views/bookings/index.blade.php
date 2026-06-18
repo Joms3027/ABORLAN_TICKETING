@@ -310,6 +310,43 @@
       }
       .booking-card .card-actions .btn { flex: 1 1 calc(50% - 0.2rem); min-width: 0; }
     }
+
+    @media (max-width: 640px) {
+      .bookings-page .page-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .bookings-page .page-header-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+      .bookings-page .page-header-actions .btn {
+        width: 100%;
+        min-width: 0;
+        justify-content: center;
+      }
+      .booking-filters {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 0.35rem;
+        margin-inline: -0.15rem;
+        padding-inline: 0.15rem;
+      }
+      .booking-filters button {
+        flex-shrink: 0;
+        min-height: 44px;
+        padding: 0.5rem 0.95rem;
+      }
+      .booking-card .card-actions .btn { flex: 1 1 100%; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+      .stat-card { padding: 0.9rem 1rem; }
+      .stat-card .value { font-size: 1.5rem; }
+    }
+
+    @media (max-width: 400px) {
+      .stat-grid { grid-template-columns: 1fr; }
+    }
   </style>
 @endpush
 

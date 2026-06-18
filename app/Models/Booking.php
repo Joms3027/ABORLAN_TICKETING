@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\URL;
 
 class Booking extends Model
 {
@@ -123,5 +124,30 @@ class Booking extends Model
         }
 
         return $this->hike_date;
+    }
+
+    public function permitDownloadToken(): string
+    {
+        return hash_hmac(
+            'sha256',
+            $this->id.'|'.$this->reference_code,
+            (string) config('app.key'),
+        );
+    }
+
+    public function permitDownloadUrl(): string
+    {
+        return URL::route('bookings.permit', [
+            'booking' => $this,
+            'token'   => $this->permitDownloadToken(),
+        ]);
+    }
+
+    public function viewUrl(): string
+    {
+        return URL::route('bookings.show', [
+            'booking' => $this,
+            'token'   => $this->permitDownloadToken(),
+        ]);
     }
 }

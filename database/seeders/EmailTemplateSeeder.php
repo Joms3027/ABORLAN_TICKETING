@@ -76,6 +76,13 @@ class EmailTemplateSeeder extends Seeder
                 'view' => 'emails.admin.suspicious-login',
                 'description' => 'Notifies administrators of repeated failed login attempts.',
             ],
+            [
+                'key' => 'admin_email_delivery_failed',
+                'name' => 'Admin: Email Delivery Failed',
+                'subject' => 'Email Delivery Failed',
+                'view' => 'emails.admin.email-delivery-failed',
+                'description' => 'Alerts administrators when an outbound email fails to deliver.',
+            ],
         ];
 
         foreach ($templates as $template) {

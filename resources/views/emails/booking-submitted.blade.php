@@ -33,7 +33,7 @@
   <p style="margin:0 0 20px;">You will receive another email once your request has been reviewed. You can track your booking status from your dashboard.</p>
 
   <p style="margin:0;">
-    <a href="{{ route('bookings.show', $booking) }}" style="display:inline-block;background:#c026d3;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600;">
+    <a href="{{ $booking->viewUrl() }}" style="display:inline-block;background:#c026d3;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600;">
       View booking
     </a>
   </p>

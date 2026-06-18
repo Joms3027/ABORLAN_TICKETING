@@ -29,6 +29,18 @@
     color: var(--navy);
     font-size: 0.95rem;
   }
+  @media (max-width: 640px) {
+    .feedback-stars label {
+      font-size: 2.25rem;
+      padding: 0.2rem 0.15rem;
+      min-width: 44px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .feedback-stars { gap: 0.05rem; }
+  }
 </style>
 
 <form method="POST" action="{{ route('bookings.feedback.store', $booking) }}">

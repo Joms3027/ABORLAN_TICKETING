@@ -253,9 +253,11 @@ class BookingController extends Controller
             ->with('status', 'Your hiking permit booking has been submitted. Reference: '.$booking->reference_code);
     }
 
-    public function show(Request $request, Booking $booking): View
+    public function show(Request $request, Booking $booking): View|RedirectResponse
     {
-        abort_unless($booking->user_id === $request->user()->id, 403);
+        if ($redirect = $this->authorizeBookingAccess($request, $booking)) {
+            return $redirect;
+        }
 
         $booking->load(['tourGuide', 'feedback']);
 
@@ -338,9 +340,15 @@ class BookingController extends Controller
             ->with('status', 'Booking '.$booking->reference_code.' has been cancelled.');
     }
 
-    public function downloadPermit(Request $request, Booking $booking): Response
+    public function downloadPermit(Request $request, Booking $booking): Response|RedirectResponse
     {
-        abort_unless($booking->user_id === $request->user()->id, 403);
+        if ($redirect = $this->authorizeBookingAccess(
+            $request,
+            $booking,
+            [Booking::STATUS_APPROVED, Booking::STATUS_COMPLETED],
+        )) {
+            return $redirect;
+        }
 
         $pdf = Pdf::loadView('bookings.partials.permit-pdf', [
             'booking' => $booking,
@@ -384,5 +392,37 @@ class BookingController extends Controller
             'waiver_acknowledged' => ! empty($entry['waiver_acknowledged']),
             'declared_at'         => $declaredAt,
         ]];
+    }
+
+    /**
+     * @param  list<string>|null  $tokenAllowedStatuses  When set, token access is limited to these statuses.
+     */
+    private function authorizeBookingAccess(
+        Request $request,
+        Booking $booking,
+        ?array $tokenAllowedStatuses = null,
+    ): ?RedirectResponse {
+        $token = (string) $request->query('token', '');
+
+        if ($token !== '' && hash_equals($booking->permitDownloadToken(), $token)) {
+            if ($tokenAllowedStatuses !== null) {
+                abort_unless(in_array($booking->status, $tokenAllowedStatuses, true), 404);
+            }
+
+            return null;
+        }
+
+        $user = $request->user();
+
+        if (! $user) {
+            return redirect()->guest(route('login'));
+        }
+
+        abort_unless(
+            $booking->user_id === $user->id || $user->is_admin,
+            403,
+        );
+
+        return null;
     }
 }

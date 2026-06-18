@@ -132,4 +132,63 @@
       </div>
     </div>
   </div>
+
+  <div class="panel" style="margin-top: 1.25rem;">
+    <div class="panel-head">
+      <h2>Email delivery</h2>
+      @if ($emailStats['queued'] > 0)
+        <span class="pill pill-pending">{{ $emailStats['queued'] }} queued</span>
+      @endif
+    </div>
+    <div class="stat-grid" style="margin-bottom: 1rem;">
+      <div class="stat-card">
+        <div class="label">Sent today</div>
+        <div class="value">{{ $emailStats['sent_today'] }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Queued</div>
+        <div class="value">{{ $emailStats['queued'] }}</div>
+        @if ($emailStats['queued'] > 0)
+          <div class="hint">Run <code>php artisan queue:work</code> to process</div>
+        @endif
+      </div>
+      <div class="stat-card">
+        <div class="label">Failed</div>
+        <div class="value" style="{{ $emailStats['failed'] > 0 ? 'color: var(--danger);' : '' }}">{{ $emailStats['failed'] }}</div>
+      </div>
+    </div>
+    @if ($recentEmails->isEmpty())
+      <p class="empty-state">No emails have been logged yet.</p>
+    @else
+      <div class="table-wrap table-cards">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Template</th>
+              <th>Recipient</th>
+              <th>Subject</th>
+              <th>Status</th>
+              <th>When</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach ($recentEmails as $email)
+              <tr>
+                <td data-label="Template">{{ str_replace('_', ' ', $email->template_key) }}</td>
+                <td data-label="Recipient">{{ $email->recipient_email }}</td>
+                <td data-label="Subject">{{ \Illuminate\Support\Str::limit($email->subject, 40) }}</td>
+                <td data-label="Status">
+                  <span class="pill pill-{{ $email->status === 'sent' ? 'approved' : ($email->status === 'failed' ? 'rejected' : 'pending') }}">{{ $email->status }}</span>
+                  @if ($email->error_message)
+                    <div class="sub" style="color: var(--danger);">{{ \Illuminate\Support\Str::limit($email->error_message, 60) }}</div>
+                  @endif
+                </td>
+                <td data-label="When">{{ ($email->sent_at ?? $email->queued_at)?->format('M j, g:i A') ?? '—' }}</td>
+              </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
+    @endif
+  </div>
 @endsection

@@ -158,6 +158,39 @@
     </div>
   </div>
 
+  @if ($emailNotifications->isNotEmpty())
+    <div class="panel" style="margin-top: 1.25rem;">
+      <div class="panel-head"><h2>Email notifications</h2></div>
+      <div class="table-wrap table-cards">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Recipient</th>
+              <th>Status</th>
+              <th>Sent</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach ($emailNotifications as $email)
+              <tr>
+                <td data-label="Type">{{ str_replace('_', ' ', $email->template_key) }}</td>
+                <td data-label="Recipient">{{ $email->recipient_email }}</td>
+                <td data-label="Status">
+                  <span class="pill pill-{{ $email->status === 'sent' ? 'approved' : ($email->status === 'failed' ? 'rejected' : 'pending') }}">{{ $email->status }}</span>
+                  @if ($email->error_message)
+                    <div class="sub" style="color: var(--danger);">{{ $email->error_message }}</div>
+                  @endif
+                </td>
+                <td data-label="Sent">{{ ($email->sent_at ?? $email->queued_at)?->format('M j, Y g:i A') ?? '—' }}</td>
+              </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
+    </div>
+  @endif
+
   @include('bookings.partials.permit-details')
   @include('bookings.partials.health-declaration-summary')
 

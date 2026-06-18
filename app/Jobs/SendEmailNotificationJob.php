@@ -3,12 +3,14 @@
 namespace App\Jobs;
 
 use App\Models\EmailNotification;
+use App\Services\NotificationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
 
@@ -31,26 +33,60 @@ class SendEmailNotificationJob implements ShouldQueue
     ) {}
 
     /**
-     * Send the mailable and mark the notification record as sent or failed.
+     * Send the mailable and mark the notification record;
      */
     public function handle(): void
     {
         $notification = EmailNotification::query()->find($this->notificationId);
 
         if ($notification === null) {
+            Log::warning('Email notification record not found', [
+                'notification_id' => $this->notificationId,
+            ]);
+
             return;
         }
 
         $notification->increment('attempts');
+        $attempt = $notification->attempts;
 
-        Mail::to($this->recipientEmail)->send($this->mailable);
-
-        $notification->update([
-            'status' => EmailNotification::STATUS_SENT,
-            'sent_at' => now(),
-            'error_message' => null,
-            'failed_at' => null,
+        Log::info('Email delivery attempt', [
+            'notification_id' => $notification->id,
+            'template_key' => $notification->template_key,
+            'recipient' => $this->recipientEmail,
+            'subject' => $notification->subject,
+            'attempt' => $attempt,
         ]);
+
+        try {
+            Mail::to($this->recipientEmail)->send($this->mailable);
+
+            $notification->update([
+                'status' => EmailNotification::STATUS_SENT,
+                'sent_at' => now(),
+                'error_message' => null,
+                'failed_at' => null,
+            ]);
+
+            Log::info('Email delivered successfully', [
+                'notification_id' => $notification->id,
+                'template_key' => $notification->template_key,
+                'recipient' => $this->recipientEmail,
+                'subject' => $notification->subject,
+                'attempt' => $attempt,
+            ]);
+        } catch (Throwable $e) {
+            Log::error('Email delivery attempt failed', [
+                'notification_id' => $notification->id,
+                'template_key' => $notification->template_key,
+                'recipient' => $this->recipientEmail,
+                'subject' => $notification->subject,
+                'attempt' => $attempt,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
     }
 
     /**
@@ -64,10 +100,23 @@ class SendEmailNotificationJob implements ShouldQueue
             return;
         }
 
+        $errorMessage = $exception?->getMessage() ?? 'Unknown delivery error';
+
         $notification->update([
             'status' => EmailNotification::STATUS_FAILED,
             'failed_at' => now(),
-            'error_message' => $exception?->getMessage() ?? 'Unknown delivery error',
+            'error_message' => $errorMessage,
         ]);
+
+        Log::error('Email delivery permanently failed', [
+            'notification_id' => $notification->id,
+            'template_key' => $notification->template_key,
+            'recipient' => $this->recipientEmail,
+            'subject' => $notification->subject,
+            'attempts' => $notification->attempts,
+            'error' => $errorMessage,
+        ]);
+
+        app(NotificationService::class)->alertAdminsDeliveryFailed($notification->fresh(), $errorMessage);
     }
 }

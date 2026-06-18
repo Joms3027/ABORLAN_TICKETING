@@ -27,7 +27,7 @@ php artisan db:seed --class=EmailTemplateSeeder
 php artisan queue:work
 ```
 
-OTP emails are sent **immediately** (synchronous). All other notifications are **queued** with 3 retries (60s, 5min, 15min backoff).
+OTP emails are sent **immediately** (synchronous). Booking **approval** and **rejection** emails are also sent **immediately** so visitors are notified without a queue worker. All other notifications are **queued** with 3 retries (60s, 5min, 15min backoff).
 
 ---
 

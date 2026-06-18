@@ -18,7 +18,13 @@
 @push('head')
   <style>
     html:has(.atup-overview) { scroll-behavior: smooth; }
-    .atup-overview { --atup-sticky-top: 7.25rem; --atup-nav-h: 3.25rem; }
+    .atup-overview {
+      --atup-sticky-top: 7.25rem;
+      --atup-nav-h: 3.25rem;
+      min-width: 0;
+      max-width: 100%;
+      overflow-x: clip;
+    }
 
     .atup-hero-lead {
       font-size: 1rem;
@@ -138,12 +144,26 @@
 
     .atup-layout {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
       gap: 1.25rem;
       align-items: start;
+      min-width: 0;
+      max-width: 100%;
     }
-    .atup-col-main { order: 2; display: flex; flex-direction: column; gap: 1.25rem; }
-    .atup-col-main > .panel { margin-top: 0 !important; }
+    .atup-col-main {
+      order: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      min-width: 0;
+      max-width: 100%;
+    }
+    .atup-col-main > .panel {
+      margin-top: 0 !important;
+      min-width: 0;
+      max-width: 100%;
+      overflow-x: clip;
+    }
     .atup-sidebar {
       order: 1;
       display: flex;
@@ -158,7 +178,7 @@
       overflow-x: hidden;
     }
     @media (min-width: 900px) {
-      .atup-layout { grid-template-columns: 1.4fr 1fr; }
+      .atup-layout { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
       .atup-col-main { order: 1; }
       .atup-sidebar {
         order: 2;
@@ -182,10 +202,20 @@
       margin: -0.35rem 0 1rem;
     }
 
+    .atup-gallery-wrap {
+      position: relative;
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+    }
     .atup-highlight-scroller {
       display: flex;
       gap: 1rem;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
       overflow-x: auto;
+      overflow-y: hidden;
       padding-bottom: 0.35rem;
       margin: 0 -0.25rem;
       padding-left: 0.25rem;
@@ -228,7 +258,6 @@
     .atup-steps .text { color: var(--text); font-size: 0.9375rem; line-height: 1.55; }
     .atup-steps .text strong { color: var(--navy); }
 
-    .atup-gallery-wrap { position: relative; }
     .atup-gallery-scroll-hint {
       display: flex;
       align-items: center;
@@ -893,7 +922,12 @@
       }
       .atup-layout {
         min-width: 0;
-        overflow-x: hidden;
+        max-width: 100%;
+        overflow-x: clip;
+      }
+      .atup-col-main > .panel,
+      .atup-sidebar .panel {
+        overflow-x: clip;
       }
       .atup-week-strip {
         gap: 0.25rem;

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Jobs\SendEmailNotificationJob;
 use App\Mail\AdminBookingCancelled;
 use App\Mail\AdminBookingSubmitted;
+use App\Mail\AdminEmailDeliveryFailed;
 use App\Mail\AdminNewAccountRegistered;
 use App\Mail\AdminSuspiciousLogin;
 use App\Mail\AccountCreated;
@@ -17,6 +18,8 @@ use App\Models\EmailTemplate;
 use App\Models\User;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Central notification service for queuing emails, logging delivery, and alerting admins.
@@ -41,11 +44,20 @@ class NotificationService
         array $metadata = [],
         bool $immediate = false,
     ): EmailNotification {
+        $recipientEmail = strtolower(trim($recipientEmail));
         $subject = $this->resolveSubject($templateKey, $mailable);
+
+        Log::info('Email send requested', [
+            'template_key' => $templateKey,
+            'recipient' => $recipientEmail,
+            'subject' => $subject,
+            'booking_id' => $bookingId,
+            'immediate' => $immediate,
+        ]);
 
         $notification = EmailNotification::create([
             'template_key' => $templateKey,
-            'recipient_email' => strtolower(trim($recipientEmail)),
+            'recipient_email' => $recipientEmail,
             'subject' => $subject,
             'status' => EmailNotification::STATUS_QUEUED,
             'user_id' => $userId,
@@ -60,28 +72,58 @@ class NotificationService
             $mailable,
         );
 
-        if ($immediate) {
-            dispatch_sync($job);
-            $notification->refresh();
-        } else {
-            SendEmailNotificationJob::dispatch(
-                $notification->id,
-                $notification->recipient_email,
-                $mailable,
-            );
+        try {
+            if ($immediate) {
+                dispatch_sync($job);
+                $notification->refresh();
+            } else {
+                SendEmailNotificationJob::dispatch(
+                    $notification->id,
+                    $notification->recipient_email,
+                    $mailable,
+                );
+            }
+        } catch (Throwable $e) {
+            $notification->update([
+                'status' => EmailNotification::STATUS_FAILED,
+                'failed_at' => now(),
+                'error_message' => $e->getMessage(),
+            ]);
+
+            Log::error('Email delivery failed during dispatch', [
+                'notification_id' => $notification->id,
+                'template_key' => $templateKey,
+                'recipient' => $recipientEmail,
+                'subject' => $subject,
+                'error' => $e->getMessage(),
+            ]);
+
+            $this->alertAdminsDeliveryFailed($notification->fresh(), $e->getMessage());
+
+            throw $e;
         }
 
         $this->auditLog->log(
-            'email_queued',
+            $notification->status === EmailNotification::STATUS_SENT ? 'email_sent' : 'email_queued',
             category: \App\Models\AuditLog::CATEGORY_EMAIL,
             userId: $userId,
             email: $recipientEmail,
+            severity: $notification->status === EmailNotification::STATUS_FAILED ? 'error' : 'info',
             metadata: [
                 'template_key' => $templateKey,
                 'notification_id' => $notification->id,
                 'immediate' => $immediate,
+                'status' => $notification->status,
             ],
         );
+
+        Log::info('Email send completed', [
+            'notification_id' => $notification->id,
+            'template_key' => $templateKey,
+            'recipient' => $recipientEmail,
+            'subject' => $subject,
+            'status' => $notification->status,
+        ]);
 
         return $notification;
     }
@@ -106,6 +148,32 @@ class NotificationService
                 bookingId: $bookingId,
                 metadata: $metadata,
             );
+        }
+    }
+
+    /**
+     * Alert administrators when an email fails to deliver.
+     */
+    public function alertAdminsDeliveryFailed(EmailNotification $notification, ?string $errorMessage = null): void
+    {
+        foreach ($this->adminRecipients() as $admin) {
+            try {
+                $this->send(
+                    'admin_email_delivery_failed',
+                    $admin->email,
+                    new AdminEmailDeliveryFailed($notification, $errorMessage),
+                    userId: $admin->id,
+                    bookingId: $notification->booking_id,
+                    metadata: ['failed_notification_id' => $notification->id],
+                    immediate: true,
+                );
+            } catch (Throwable $e) {
+                Log::error('Could not alert admin about email delivery failure', [
+                    'admin_email' => $admin->email,
+                    'failed_notification_id' => $notification->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
     }
 
@@ -153,11 +221,20 @@ class NotificationService
     }
 
     /**
-     * Booking approval notification to the visitor.
+     * Booking approval notification to the visitor (sent immediately).
      */
-    public function sendBookingApproved(\App\Models\Booking $booking): EmailNotification
+    public function sendBookingApproved(\App\Models\Booking $booking): ?EmailNotification
     {
         $booking->loadMissing(['user', 'tourGuide']);
+
+        if ($this->wasRecentlyNotified($booking->id, 'booking_approved')) {
+            Log::warning('Skipping duplicate booking approval email', [
+                'booking_id' => $booking->id,
+                'reference' => $booking->reference_code,
+            ]);
+
+            return null;
+        }
 
         return $this->send(
             'booking_approved',
@@ -165,15 +242,25 @@ class NotificationService
             new BookingApproved($booking),
             userId: $booking->user_id,
             bookingId: $booking->id,
+            immediate: true,
         );
     }
 
     /**
-     * Booking rejection notification to the visitor.
+     * Booking rejection notification to the visitor (sent immediately).
      */
-    public function sendBookingRejected(\App\Models\Booking $booking): EmailNotification
+    public function sendBookingRejected(\App\Models\Booking $booking): ?EmailNotification
     {
         $booking->loadMissing('user');
+
+        if ($this->wasRecentlyNotified($booking->id, 'booking_rejected')) {
+            Log::warning('Skipping duplicate booking rejection email', [
+                'booking_id' => $booking->id,
+                'reference' => $booking->reference_code,
+            ]);
+
+            return null;
+        }
 
         return $this->send(
             'booking_rejected',
@@ -181,6 +268,7 @@ class NotificationService
             new BookingRejected($booking),
             userId: $booking->user_id,
             bookingId: $booking->id,
+            immediate: true,
         );
     }
 
@@ -246,7 +334,20 @@ class NotificationService
         return User::query()->where('is_admin', true)->get();
     }
 
-  /**
+    /**
+     * Prevent duplicate notifications from rapid repeated submissions.
+     */
+    protected function wasRecentlyNotified(int $bookingId, string $templateKey): bool
+    {
+        return EmailNotification::query()
+            ->where('booking_id', $bookingId)
+            ->where('template_key', $templateKey)
+            ->whereIn('status', [EmailNotification::STATUS_QUEUED, EmailNotification::STATUS_SENT])
+            ->where('created_at', '>=', now()->subMinutes(2))
+            ->exists();
+    }
+
+    /**
      * Resolve the email subject from template metadata or the mailable envelope.
      */
     protected function resolveSubject(string $templateKey, Mailable $mailable): string

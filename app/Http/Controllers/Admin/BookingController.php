@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\EmailNotification;
 use App\Services\BookingAvailability;
 use App\Services\BookingStatusService;
 use App\Services\NotificationService;
@@ -57,8 +58,15 @@ class BookingController extends Controller
     {
         $booking->load(['user', 'tourGuide', 'feedback']);
 
+        $emailNotifications = EmailNotification::query()
+            ->where('booking_id', $booking->id)
+            ->latest('id')
+            ->limit(5)
+            ->get();
+
         return view('admin.bookings.show', [
             'booking'            => $booking,
+            'emailNotifications' => $emailNotifications,
             'dayQuota'           => BookingAvailability::quotaForDate($booking->hike_date),
             'dayBooked'          => BookingAvailability::bookedSlotsForDate($booking->hike_date),
             'dayRemaining'       => BookingAvailability::remainingForDate($booking->hike_date),
@@ -101,6 +109,8 @@ class BookingController extends Controller
         }
 
         $message = 'Booking '.$booking->reference_code.' updated to '.$booking->statusLabel().'.';
+        $flashKey = 'status';
+        $emailNotification = null;
 
         if ($data['status'] === Booking::STATUS_APPROVED) {
             $guide = app(TourGuideAssignment::class)->assign($booking->fresh());
@@ -115,19 +125,61 @@ class BookingController extends Controller
         if ($previousStatus !== $data['status']) {
             $booking->load(['user', 'tourGuide']);
 
-            try {
-                if ($data['status'] === Booking::STATUS_APPROVED) {
-                    $this->notifications->sendBookingApproved($booking);
-                } elseif ($data['status'] === Booking::STATUS_REJECTED) {
-                    $this->notifications->sendBookingRejected($booking);
+            if (! $booking->user?->email) {
+                $message .= ' Warning: No email address on file for this visitor — notification could not be sent.';
+                $flashKey = 'warning';
+            } elseif ($data['status'] === Booking::STATUS_APPROVED) {
+                try {
+                    $emailNotification = $this->notifications->sendBookingApproved($booking);
+                    $message .= $this->emailDeliveryMessage($emailNotification, $booking->user->email);
+                    $flashKey = $this->emailFlashKey($emailNotification);
+                } catch (\Throwable $e) {
+                    report($e);
+                    $message .= ' Warning: Approval saved but email could not be sent — '.$e->getMessage();
+                    $flashKey = 'warning';
                 }
-            } catch (\Throwable $e) {
-                report($e);
+            } elseif ($data['status'] === Booking::STATUS_REJECTED) {
+                try {
+                    $emailNotification = $this->notifications->sendBookingRejected($booking);
+                    $message .= $this->emailDeliveryMessage($emailNotification, $booking->user->email);
+                    $flashKey = $this->emailFlashKey($emailNotification);
+                } catch (\Throwable $e) {
+                    report($e);
+                    $message .= ' Warning: Rejection saved but email could not be sent — '.$e->getMessage();
+                    $flashKey = 'warning';
+                }
             }
         }
 
         return redirect()
             ->route('admin.bookings.show', $booking)
-            ->with('status', $message);
+            ->with($flashKey, $message);
+    }
+
+    protected function emailDeliveryMessage(?EmailNotification $notification, string $recipientEmail): string
+    {
+        if ($notification === null) {
+            return ' Notification email was already sent recently.';
+        }
+
+        if ($notification->status === EmailNotification::STATUS_SENT) {
+            return ' Notification email sent to '.$recipientEmail.'.';
+        }
+
+        if ($notification->status === EmailNotification::STATUS_FAILED) {
+            return ' Warning: Email delivery failed for '.$recipientEmail
+                .($notification->error_message ? ' — '.$notification->error_message : '.');
+        }
+
+        return ' Notification email queued for '.$recipientEmail.'.';
+    }
+
+    protected function emailFlashKey(?EmailNotification $notification): string
+    {
+        if ($notification === null) {
+            return 'status';
+        }
+
+        return $notification->status === EmailNotification::STATUS_FAILED ? 'warning' : 'status';
     }
 }

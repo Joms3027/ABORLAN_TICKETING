@@ -796,7 +796,7 @@
         @if ($allUpcoming->isEmpty())
           <p class="tg-empty-inline">No upcoming assigned groups.</p>
         @else
-          <div class="table-wrap">
+          <div class="table-wrap table-cards">
             <table class="data">
               <thead>
                 <tr>
@@ -811,15 +811,15 @@
               <tbody>
                 @foreach ($allUpcoming as $booking)
                   <tr>
-                    <td><strong>{{ $booking->hike_date->format('M j, Y') }}</strong></td>
-                    <td>{{ $booking->reference_code }}</td>
-                    <td>
+                    <td data-label="Date"><strong>{{ $booking->hike_date->format('M j, Y') }}</strong></td>
+                    <td data-label="Reference">{{ $booking->reference_code }}</td>
+                    <td data-label="Visitor / group">
                       {{ $booking->user?->name ?? '—' }}
                       @if ($booking->user?->email)<div class="sub">{{ $booking->user->email }}</div>@endif
                     </td>
-                    <td>{{ $booking->tourGuide?->name ?? '—' }}</td>
-                    <td>{{ $booking->party_size }}</td>
-                    <td><a href="{{ route('admin.bookings.show', $booking) }}" class="btn btn-secondary btn-sm">Open</a></td>
+                    <td data-label="Guide">{{ $booking->tourGuide?->name ?? '—' }}</td>
+                    <td data-label="Party">{{ $booking->party_size }}</td>
+                    <td class="actions-cell" data-label="Actions"><a href="{{ route('admin.bookings.show', $booking) }}" class="btn btn-secondary btn-sm">Open</a></td>
                   </tr>
                 @endforeach
               </tbody>
@@ -835,7 +835,7 @@
             <strong>{{ $unassignedApproved->count() }} approved {{ \Illuminate\Support\Str::plural('group', $unassignedApproved->count()) }} still need a guide.</strong>
             Add guides to the roster, or open a booking and save as <strong>Approved</strong> again once a guide is free.
           </div>
-          <div class="table-wrap">
+          <div class="table-wrap table-cards">
             <table class="data">
               <thead>
                 <tr>
@@ -849,14 +849,14 @@
               <tbody>
                 @foreach ($unassignedApproved as $booking)
                   <tr>
-                    <td><strong>{{ $booking->hike_date->format('D, M j, Y') }}</strong></td>
-                    <td>{{ $booking->reference_code }}</td>
-                    <td>
+                    <td data-label="Hike date"><strong>{{ $booking->hike_date->format('D, M j, Y') }}</strong></td>
+                    <td data-label="Reference">{{ $booking->reference_code }}</td>
+                    <td data-label="Visitor / group">
                       {{ $booking->user?->name ?? '—' }}
                       @if ($booking->user?->email)<div class="sub">{{ $booking->user->email }}</div>@endif
                     </td>
-                    <td>{{ $booking->party_size }} hiker(s)</td>
-                    <td><a href="{{ route('admin.bookings.show', $booking) }}" class="btn btn-primary btn-sm">Open booking</a></td>
+                    <td data-label="Party">{{ $booking->party_size }} hiker(s)</td>
+                    <td class="actions-cell" data-label="Actions"><a href="{{ route('admin.bookings.show', $booking) }}" class="btn btn-primary btn-sm">Open booking</a></td>
                   </tr>
                 @endforeach
               </tbody>

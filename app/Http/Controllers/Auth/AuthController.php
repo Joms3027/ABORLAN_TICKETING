@@ -84,6 +84,7 @@ class AuthController extends Controller
 
     /**
      * Validate credentials, then require email OTP verification before signing in.
+     * Administrators skip OTP and are signed in immediately after password validation.
      */
     public function login(Request $request): RedirectResponse
     {
@@ -125,6 +126,23 @@ class AuthController extends Controller
         }
 
         RateLimiter::clear($throttleKey);
+
+        if ($user->is_admin) {
+            $this->auditLog->logAdminLogin(
+                $user->id,
+                $user->email,
+                $request->ip() ?? '0.0.0.0',
+                otpBypassed: true,
+                metadata: ['remember' => $request->boolean('remember')],
+            );
+
+            Auth::login($user, $request->boolean('remember'));
+            $request->session()->regenerate();
+
+            return redirect()
+                ->intended(route('admin.dashboard'))
+                ->with('status', 'Signed in successfully.');
+        }
 
         $result = $this->otpService->generateAndSend(
             $user->email,

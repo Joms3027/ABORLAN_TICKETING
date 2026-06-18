@@ -8,6 +8,27 @@
   <span>Home page</span>
 @endsection
 
+@push('head')
+  <style>
+    .gallery-slide-grid {
+      display: grid;
+      grid-template-columns: minmax(120px, 200px) 1fr;
+      gap: 1rem;
+      align-items: start;
+    }
+    @media (max-width: 640px) {
+      .gallery-slide-grid {
+        grid-template-columns: 1fr;
+      }
+      .gallery-slide-grid img {
+        max-height: 200px;
+        object-fit: cover;
+        width: 100%;
+      }
+    }
+  </style>
+@endpush
+
 @section('content')
   <div class="page-header">
     <h1>Home page gallery &amp; hero</h1>
@@ -72,7 +93,7 @@
       <div style="display: flex; flex-direction: column; gap: 1.25rem;">
         @foreach ($slides as $slide)
           <article style="border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; background: #faf5ff;">
-            <div style="display: grid; grid-template-columns: minmax(120px, 200px) 1fr; gap: 1rem; align-items: start;">
+            <div class="gallery-slide-grid">
               <a href="{{ $slide->publicImageUrl() }}" target="_blank" rel="noopener" style="display:block; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border);">
                 <img src="{{ $slide->publicImageUrl() }}" alt="" style="width:100%; height:auto; display:block;" />
               </a>

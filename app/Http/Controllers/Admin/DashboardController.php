@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\EmailNotification;
 use App\Models\User;
 use App\Services\BookingAvailability;
 use Illuminate\Support\Carbon;
@@ -45,10 +46,29 @@ class DashboardController extends Controller
 
         $upcoming = BookingAvailability::upcomingAvailability(7);
 
+        $emailStats = Cache::remember(
+            'dashboard:email_stats',
+            now()->addSeconds(30),
+            fn () => [
+                'queued' => EmailNotification::where('status', EmailNotification::STATUS_QUEUED)->count(),
+                'sent_today' => EmailNotification::where('status', EmailNotification::STATUS_SENT)
+                    ->whereDate('sent_at', $today)->count(),
+                'failed' => EmailNotification::where('status', EmailNotification::STATUS_FAILED)->count(),
+            ],
+        );
+
+        $recentEmails = EmailNotification::query()
+            ->with(['user:id,name', 'booking:id,reference_code'])
+            ->latest('id')
+            ->take(6)
+            ->get();
+
         return view('admin.dashboard', [
             'stats'          => $stats,
             'recentBookings' => $recentBookings,
             'upcoming'       => $upcoming,
+            'emailStats'     => $emailStats,
+            'recentEmails'   => $recentEmails,
         ]);
     }
 }

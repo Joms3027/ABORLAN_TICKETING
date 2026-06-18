@@ -227,6 +227,7 @@
     display: flex;
     align-items: center;
     gap: 0.6rem;
+    min-height: 44px;
     padding: 0.75rem 0.9rem;
     border: none;
     background: transparent;
@@ -301,6 +302,7 @@
     z-index: 20;
     margin: 1.25rem -1.25rem -1.25rem;
     padding: 0.85rem 1.25rem;
+    padding-bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
     background: linear-gradient(180deg, rgba(255,255,255,0.92), #fff 30%);
     border-top: 1px solid var(--border);
     backdrop-filter: blur(6px);
@@ -416,9 +418,14 @@
     .booking-step-label small { display: none; }
     .booking-step { flex: 1 1 calc(50% - 0.25rem); justify-content: center; }
     .booking-step-label { display: none; }
+    .portal-content {
+      padding-bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px));
+    }
   }
   @media (max-width: 480px) {
     .booking-step { flex: 1 1 calc(25% - 0.25rem); padding: 0.4rem; }
+    .party-stepper { max-width: 100%; }
+    .party-step-btn { width: 3rem; min-height: 44px; }
   }
 </style>
 @endpush
@@ -457,20 +464,20 @@
   </div>
 
   <nav class="booking-steps" aria-label="Application steps">
-    <button type="button" class="booking-step is-active" data-scroll-to="section-schedule">
-      <span class="booking-step-num">1</span>
+    <button type="button" class="booking-step is-active" data-scroll-to="section-schedule" aria-label="Step 1: Schedule — date and group size">
+      <span class="booking-step-num" aria-hidden="true">1</span>
       <span class="booking-step-label">Schedule<small>Date &amp; group size</small></span>
     </button>
-    <button type="button" class="booking-step" data-scroll-to="section-details">
-      <span class="booking-step-num">2</span>
+    <button type="button" class="booking-step" data-scroll-to="section-details" aria-label="Step 2: Trip details — route and contacts">
+      <span class="booking-step-num" aria-hidden="true">2</span>
       <span class="booking-step-label">Trip details<small>Route &amp; contacts</small></span>
     </button>
-    <button type="button" class="booking-step" data-scroll-to="section-roster">
-      <span class="booking-step-num">3</span>
+    <button type="button" class="booking-step" data-scroll-to="section-roster" aria-label="Step 3: Visitors — one row per person">
+      <span class="booking-step-num" aria-hidden="true">3</span>
       <span class="booking-step-label">Visitors<small>One row per person</small></span>
     </button>
-    <button type="button" class="booking-step" data-scroll-to="section-submit">
-      <span class="booking-step-num">4</span>
+    <button type="button" class="booking-step" data-scroll-to="section-submit" aria-label="Step 4: Submit — rules and health form">
+      <span class="booking-step-num" aria-hidden="true">4</span>
       <span class="booking-step-label">Submit<small>Rules &amp; health form</small></span>
     </button>
   </nav>

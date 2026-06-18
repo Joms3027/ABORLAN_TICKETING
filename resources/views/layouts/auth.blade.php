@@ -38,7 +38,7 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; overflow-x: clip; -webkit-text-size-adjust: 100%; }
 
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
@@ -54,6 +54,7 @@
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
       min-height: 100dvh;
+      overflow-x: clip;
     }
 
     a { color: var(--teal-hover); text-decoration: none; font-weight: 600; }
@@ -540,6 +541,14 @@
     @media (max-width: 640px) {
       .input { font-size: 16px; }
       .btn { min-height: 48px; }
+      .auth-main { padding-bottom: env(safe-area-inset-bottom, 0px); }
+      .auth-back { min-height: 44px; }
+      .input-group .input-toggle {
+        width: 2.75rem;
+        height: 2.75rem;
+        min-width: 44px;
+        min-height: 44px;
+      }
     }
   </style>
   @stack('head')

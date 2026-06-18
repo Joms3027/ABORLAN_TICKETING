@@ -44,6 +44,15 @@
       --topbar-h: 64px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { overflow-x: clip; -webkit-text-size-adjust: 100%; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
     body.portal-body {
       font-family: var(--font);
       color: var(--text);
@@ -52,8 +61,10 @@
       font-size: 1rem;
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
+      min-height: 100dvh;
       overflow-x: clip;
     }
+    body.portal-body.sidebar-locked { overflow: hidden; touch-action: none; }
     a { color: var(--teal-hover); }
     a:hover { color: var(--navy); }
     .container { width: min(94%, 1180px); margin-inline: auto; }
@@ -138,6 +149,7 @@
       display: flex;
       align-items: center;
       gap: 0.65rem;
+      min-height: 44px;
       padding: 0.6rem 0.75rem;
       border-radius: var(--radius-sm);
       font-weight: 600;
@@ -184,6 +196,7 @@
       align-items: center;
       gap: 0.5rem;
       width: 100%;
+      min-height: 44px;
       padding: 0.55rem 0.75rem;
       border-radius: var(--radius-sm);
       font-size: 0.85rem;
@@ -228,6 +241,7 @@
       flex-wrap: wrap;
       min-height: var(--topbar-h);
       padding: 0.75rem clamp(1rem, 3vw, 1.75rem);
+      padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
       background: #fff;
       border-bottom: 1px solid var(--border);
       box-shadow: var(--shadow-sm);
@@ -245,8 +259,10 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 2.5rem;
-      height: 2.5rem;
+      width: 2.75rem;
+      height: 2.75rem;
+      min-width: 44px;
+      min-height: 44px;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       background: #fff;
@@ -286,7 +302,13 @@
     }
     .portal-user-chip strong { color: var(--navy); }
 
-    .portal-content { flex: 1; padding: clamp(1.25rem, 3vw, 2rem) clamp(1rem, 3vw, 1.75rem) 2.5rem; }
+    .portal-content {
+      flex: 1;
+      min-width: 0;
+      max-width: 100%;
+      overflow-x: clip;
+      padding: clamp(1.25rem, 3vw, 2rem) clamp(1rem, 3vw, 1.75rem) 2.5rem;
+    }
 
     .page-header { margin-bottom: 1.75rem; }
     .page-header h1 {
@@ -316,6 +338,12 @@
       gap: 0.5rem 1rem; margin-bottom: 1rem;
     }
     .panel-head--stack .pill { flex-shrink: 0; }
+    .panel-head-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
     .panel-head h2 {
       font-size: 1.125rem;
       color: var(--navy);
@@ -680,6 +708,40 @@
         align-items: center;
       }
       .table-wrap.table-cards table.data td.actions-cell::before { display: none; }
+      .roster-table-wrap table.roster-table thead { display: none; }
+      .roster-table-wrap table.roster-table tbody tr {
+        display: block;
+        margin-bottom: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: #fff;
+        box-shadow: var(--shadow-sm);
+      }
+      .roster-table-wrap table.roster-table td {
+        display: grid;
+        grid-template-columns: minmax(0, 38%) 1fr;
+        gap: 0.25rem 0.75rem;
+        padding: 0.55rem 0.85rem;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+      }
+      .roster-table-wrap table.roster-table td:last-child { border-bottom: none; }
+      .roster-table-wrap table.roster-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+      }
+      .roster-table-wrap table.roster-table td.roster-num {
+        display: block;
+        padding-bottom: 0.35rem;
+        border-bottom: 1px solid var(--border);
+        font-weight: 700;
+        color: var(--navy);
+      }
+      .roster-table-wrap table.roster-table td.roster-num::before { display: none; }
     }
 
     @media (max-width: 640px) {
@@ -702,10 +764,23 @@
       .portal-topbar-actions { width: 100%; }
       .portal-topbar-actions .btn { flex: 1; justify-content: center; }
       .portal-user-chip { width: 100%; text-align: center; }
+      .panel-head--stack {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.65rem;
+      }
+      .panel-head-actions {
+        width: 100%;
+        flex-direction: column;
+      }
+      .panel-head-actions .btn { width: 100%; justify-content: center; }
+      .page-header { margin-bottom: 1.25rem; }
+      .page-header p { font-size: 0.9375rem; }
     }
 
     @media (max-width: 480px) {
       .stat-card .value { font-size: 1.5rem; }
+      .portal-topbar-title h1 { font-size: 1.05rem; }
     }
   </style>
   @stack('head')
@@ -842,16 +917,34 @@
       var app = document.getElementById('portalApp');
       var toggle = document.getElementById('portalMenuToggle');
       var backdrop = document.getElementById('portalSidebarBackdrop');
+      var body = document.body;
       function setOpen(open) {
         app.classList.toggle('sidebar-open', open);
-        if (toggle) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (toggle) {
+          toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+          toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+        }
+        if (window.matchMedia('(max-width: 959px)').matches) {
+          body.classList.toggle('sidebar-locked', open);
+        } else {
+          body.classList.remove('sidebar-locked');
+        }
       }
       if (toggle) toggle.addEventListener('click', function () { setOpen(!app.classList.contains('sidebar-open')); });
       if (backdrop) backdrop.addEventListener('click', function () { setOpen(false); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && app.classList.contains('sidebar-open')) setOpen(false);
+      });
       document.querySelectorAll('.portal-nav a, .portal-sidebar-foot a, .portal-sidebar-foot button').forEach(function (link) {
         link.addEventListener('click', function () {
           if (window.matchMedia('(max-width: 959px)').matches) setOpen(false);
         });
+      });
+      window.addEventListener('resize', function () {
+        if (window.matchMedia('(min-width: 960px)').matches) {
+          setOpen(false);
+          body.classList.remove('sidebar-locked');
+        }
       });
     })();
   </script>
